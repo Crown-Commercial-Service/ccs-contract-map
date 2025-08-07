@@ -4,7 +4,10 @@ from pathlib import Path
 from contract_mapping_v2 import contract_mapper_v2
 """
 This script is used to check how well LLM classifies
-using csv containing  examples of contracts
+using csv containing  examples of contract description.
+Here system prompts are compared to see which LLM architecture
+to go with. From experiment the LLM in app.py is the most
+stable and accurate.
 """
 
 
@@ -22,12 +25,12 @@ for description, category in zip(list_descriptions, list_category):
     result = contract_mapper(system_prompt_file_location= system_prompt_file_location,user_contract_description=description)
     list_results.append(result)
     print(f"V1 actual:{category}  AI:{result}, {category in result}")
-    if category in result:
+    if category == result:
         count_correct += 1
     result2 = contract_mapper_v2(user_contract_description=description)
     list_results2.append(result2)
     print(f"V2 actual:{category}  AI:{result2}, {category in result2}")
-    if category in result2:
+    if category == result2:
         count_correct2 += 1
     print()
 
