@@ -16,12 +16,13 @@ llm = AzureChatOpenAI(
     top_p=1,
     frequency_penalty=0,
     presence_penalty=0,
+    seed=42,
+    max_tokens=4,
 )
 
-#When you respond, output ONLY the exact category name shown in single quotes at the start of each category (for example, output 'Energy', NOT 'Energy: National Fuels, Provision of Power Purchase Agreement, Supply of Energy, Water, Wastewater and Ancillary Services.'). No additional text or explanation.
+
 def contract_mapper_v2(user_contract_description, llm=llm):
     input_prompt = f"\n user input:{user_contract_description} "
     response = llm.invoke(SYSTEM_PROMPT + input_prompt)
-    final_response = llm.invoke(
-    response.content + "\n From the text above what Category was picked, only give the Category to user for example: Energy")
-    return final_response.content
+
+    return response.content

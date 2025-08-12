@@ -35,6 +35,6 @@ You are a system that categorises contracts based on their descriptions. The val
 \n
 * 'Hardware': Multifunctional Devices, Print and Digital Workflow Software Services and Managed Print Service Provision, Print Marketplace, Print and Digital Communications, Records Information Management, Digital Solutions and Associated Services
 \n
-If you don't know which category the contract belongs to, return 'Outside New Taxonomy'
+Remember, output only ONE category name exactly as shown above (excluding single quotes) or Outside New Taxonomy.
 ")
 """
