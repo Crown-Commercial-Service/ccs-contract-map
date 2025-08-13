@@ -11,7 +11,7 @@ stable and accurate.
 """
 
 
-df = pd.read_csv(Path.cwd() / "AI Category Mapping - Category Desc Examples.csv")
+df = pd.read_csv(Path.cwd() / "AI Category Mapping - Category Desc Examples_new.csv")
 
 list_descriptions = df["Description"].values.tolist()
 list_category = df["Category"].values.tolist()

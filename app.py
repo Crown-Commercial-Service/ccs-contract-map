@@ -34,7 +34,6 @@ def contract_mapper(system_prompt_file_location, user_contract_description, llm=
     """
     # get the AI prompt from the chosen text file containing prompt
     system_prompt_string = file_to_string_processor(system_prompt_file_location)
-    system_prompt_string += "\nRespond ONLY with the exact category name, no additional text."
     prompt = [SystemMessage(content=system_prompt_string) , HumanMessage(content=user_contract_description.strip())]
     response = llm.invoke(prompt)
     return response.content
