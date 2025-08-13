@@ -11,7 +11,6 @@ Categories:
 * 'Travel, Accommodation and Venues': Travel arrangements, accommodation, and venue services.
 * 'Construction': Building works, emergency repairs, architectural and engineering services related to building and infrastructure projects, materials supply.
 * 'Energy': Electricity, gas, fuel supply, power purchase agreements, water, wastewater services.
-* 'Estates Support Services': Estate management support services.
 * 'Facilities Management': Building maintenance, cleaning, security, logistics, furniture, healthcare soft FM.
 * 'Low Value': Low monetary value contracts not classified elsewhere.
 * 'Cloud and Hosting': Cloud computing, hosting, G-Cloud framework services.

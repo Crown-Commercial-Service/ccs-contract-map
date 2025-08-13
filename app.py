@@ -19,7 +19,7 @@ llm = AzureChatOpenAI(
     frequency_penalty=0,
     presence_penalty=0,
     seed=42,
-    max_tokens=4,
+    max_tokens=6,
 )
 
 
