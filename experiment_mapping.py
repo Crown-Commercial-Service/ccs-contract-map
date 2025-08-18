@@ -12,6 +12,8 @@ stable and accurate.
 
 
 df = pd.read_csv(Path.cwd() / "AI Category Mapping - Category Desc Examples_new.csv")
+df = df.dropna(subset=['Description']).copy() #in case anyone forgets to add a description
+df = df.reset_index(drop=True)
 
 list_descriptions = df["Description"].values.tolist()
 list_category = df["Category"].values.tolist()
@@ -37,8 +39,8 @@ for description, category in zip(list_descriptions, list_category):
 
 print(f" V1 accuracy:{(count_correct/len(list_descriptions))*100}%")
 print(f" V2 accuracy:{(count_correct2/len(list_descriptions))*100}%")
-new_df = df[["Category", "Description"]]
+new_df = df[["Category", "Description"]].copy()
 new_df["LLM Version1"] = list_results
 new_df["LLM Version2"] = list_results2
-new_df.to_csv("AI_results.csv", sep='\t', encoding='utf-8')
+new_df.to_csv("AI_results.csv")
 print("experiment completed")
