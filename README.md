@@ -22,6 +22,9 @@ or admit multiple valid answers, so the model may produce different responses on
 Setting temperature to 0 reduces randomness but does not guarantee identical outputs. For more information, see: 
 https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reproducible-output?tabs=pyton
 
+recent experiment of LLM version 2 system prompt vs system prompt version 2 can be seen: 
+here: https://docs.google.com/document/d/1faUwE-W7Eh3n6qg4sblHMjMtkmziJCG9/edit#heading=h.vigkhlj1brjf
+The experiment was ran using demo_script_v2.py
 
 ## How It Works
 

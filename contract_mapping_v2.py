@@ -1,11 +1,11 @@
 from langchain_openai import AzureChatOpenAI
 from dotenv import load_dotenv
 import os
-from python_system_prompt import system_prompt
+from python_system_prompt import system_prompt_v2
 
 load_dotenv()
 
-SYSTEM_PROMPT = system_prompt()
+SYSTEM_PROMPT = system_prompt_v2()
 
 llm = AzureChatOpenAI(
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
