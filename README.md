@@ -35,6 +35,8 @@ The experiment was ran using demo_script_v2.py
 
 ## How to get to run on own pc
 
+### From the terminal
+
 1. go into the repo folder in your command-line using `cd`
 2. run command `poetry install` (make sure you have poetry on your pc)
 3. create a `.env` file to load your azure credentials(name your credentials as shown below):
@@ -46,3 +48,11 @@ The experiment was ran using demo_script_v2.py
 the columns are labelled as `Description` and `Category`. Please name the csv file `AI Category Mapping - Category Desc Examples_new.csv`
 5. to run experiment you can run on your IDE the file `experiment_mapping.py` which will output a csv called `AI_results.csv`
 
+### From a jupyter notebook
+
+1. Install the environment as a jupyter kernel by running `poetry run python -m ipykernel install --user --name="ccs-contract-map"`
+2. Launch a jupyter lab session by running `poetry run jupyter lab`
+3. In the jupyter lab landing page that launches in your browser, select the kernel `ccs-contract-map`
+4. Open the notebook `prompt_engineering_experiment.ipynb`
+
+**Note:** if your browser doesn't automatically load the jupyter lab landing page, you may need to follow the link that is displayed in the terminal instead
