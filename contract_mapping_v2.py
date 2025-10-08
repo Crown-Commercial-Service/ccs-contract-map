@@ -1,11 +1,11 @@
 from langchain_openai import AzureChatOpenAI
 from dotenv import load_dotenv
 import os
-from python_system_prompt import system_prompt
+from python_system_prompt import system_prompt_v2
 
 load_dotenv()
 
-SYSTEM_PROMPT = system_prompt()
+SYSTEM_PROMPT = system_prompt_v2()
 
 llm = AzureChatOpenAI(
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
@@ -21,8 +21,8 @@ llm = AzureChatOpenAI(
 )
 
 
-def contract_mapper_v2(user_contract_description, llm=llm):
+def contract_mapper_v2(user_contract_description, llm=llm, system_prompt=SYSTEM_PROMPT):
     input_prompt = f"\n user input:{user_contract_description} "
-    response = llm.invoke(SYSTEM_PROMPT + input_prompt)
+    response = llm.invoke(system_prompt + input_prompt)
 
     return response.content
