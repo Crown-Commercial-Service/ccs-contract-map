@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from pathlib import Path
 from datetime import datetime
+import git
 
 
 app = FastAPI()
@@ -22,33 +23,34 @@ def run_contract_mapper(body: ContractDescription):
         print("Error:", e)
         return {"error": str(e)}
 
-@app.post("/model_version")
-def metadata():
-    system_prompt_file = Path.cwd() / "python_system_prompt.py"
-    llm_script_file = Path.cwd() / "contract_mapping_v2.py"
+
+@app.get("/model_info")
+def model_info():
+    """
+    Provides metadata about the currently deployed model.
+    """
     try:
-        system_prompt_file_stat = system_prompt_file.stat()
-        llm_script_file_stat = llm_script_file.stat()
-        system_prompt_file_modified_time = datetime.fromtimestamp(system_prompt_file_stat.st_mtime)
-        llm_script_file_modified_time = datetime.fromtimestamp(llm_script_file_stat.st_mtime)
-        with open(Path.cwd() / "contract_map_update_logs.txt", "r") as f:
-            last_update = f.readlines()
-        if len(last_update) == 0:
-            with open(Path.cwd() / "contract_map_update_logs.txt", "w") as f:
-                latest_date = max(system_prompt_file_modified_time, llm_script_file_modified_time)
-                f.write(str(latest_date))
-                return {"models_latest_update":latest_date}
-        if len(last_update) == 1:
-            lastest_date = max(system_prompt_file_modified_time, llm_script_file_modified_time)
+        # Robustly define the files that constitute the model
+        model_files = [
+            Path.cwd() / "python_system_prompt.py",
+            Path.cwd() / "contract_mapping_v2.py"
+        ]
 
-            if lastest_date > datetime.strptime(last_update[0].strip(), "%Y-%m-%d %H:%M:%S.%f" ):
-                with open(Path.cwd() / "contract_map_update_logs.txt", "w") as f:
-                    f.write(str(lastest_date))
-                    return {"models_latest_update": lastest_date}
-            else:
-                return {"models_latest_update": last_update[0]}
+        # Find the most recent modification time among the model files
+        latest_update = max(
+            datetime.fromtimestamp(p.stat().st_mtime) for p in model_files if p.exists()
+        )
 
+        # Retrieve a git commit hash for cases where files were updated multiple times on the same day
+        repo = git.Repo(search_parent_directories=True)
+        commit_hash = repo.head.object.hexsha
+
+        return {
+            "last_updated": latest_update,
+            "version": commit_hash
+        }
     except Exception as e:
         print("Error:", e)
         return {"error": str(e)}
+
 
