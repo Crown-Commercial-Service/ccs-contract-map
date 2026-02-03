@@ -23,8 +23,7 @@ llm = AzureChatOpenAI(
 )
 
 
-
-def contract_mapper(system_prompt_file_location, user_contract_description, llm=llm):
+async def contract_mapper(system_prompt_file_location, user_contract_description, llm=llm):
     """ This function reads a description of a contract and labels it.
 
     :param llm: AzureChatOpenAI model
