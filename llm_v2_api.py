@@ -1,7 +1,6 @@
 from contract_mapping_v2 import contract_mapper_v2
 from fastapi import FastAPI
 from pydantic import BaseModel
-from pathlib import Path
 
 
 app = FastAPI()
