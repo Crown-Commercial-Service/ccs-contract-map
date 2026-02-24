@@ -9,7 +9,9 @@ by looking at contract description
 
 
 df = pd.read_csv(Path.cwd() / "AI Category Mapping - Category Desc Examples_new.csv")
-df = df.dropna(subset=['Description']).copy() #in case anyone forgets to add a description
+df = df.dropna(
+    subset=["Description"]
+).copy()  # in case anyone forgets to add a description
 df = df.reset_index(drop=True)
 
 list_descriptions = df["Description"].values.tolist()
@@ -27,8 +29,9 @@ for description, category in zip(list_descriptions, list_category):
     print()
 
 
-
-print(f" AI accuracy:{(count_correct/len(list_descriptions))*100}% on {len(list_results)} samples")
+print(
+    f" AI accuracy:{(count_correct/len(list_descriptions))*100}% on {len(list_results)} samples"
+)
 
 
 new_df = df[["Category", "Description"]].copy()

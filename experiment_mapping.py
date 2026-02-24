@@ -2,6 +2,7 @@ from app import contract_mapper
 import pandas as pd
 from pathlib import Path
 from contract_mapping_v2 import contract_mapper_v2
+
 """
 This script is used to check how well LLM classifies
 using csv containing  examples of contract description.
@@ -12,7 +13,9 @@ stable and accurate.
 
 
 df = pd.read_csv(Path.cwd() / "AI Category Mapping - Category Desc Examples_new.csv")
-df = df.dropna(subset=['Description']).copy() #in case anyone forgets to add a description
+df = df.dropna(
+    subset=["Description"]
+).copy()  # in case anyone forgets to add a description
 df = df.reset_index(drop=True)
 
 list_descriptions = df["Description"].values.tolist()
@@ -24,7 +27,10 @@ count_correct2 = 0
 list_results2 = []
 for description, category in zip(list_descriptions, list_category):
     system_prompt_file_location = Path.cwd() / "new_system_prompt.txt"
-    result = contract_mapper(system_prompt_file_location= system_prompt_file_location,user_contract_description=description)
+    result = contract_mapper(
+        system_prompt_file_location=system_prompt_file_location,
+        user_contract_description=description,
+    )
     list_results.append(result)
     print(f"V1 actual:{category}  AI:{result}, {category in result}")
     if category == result:

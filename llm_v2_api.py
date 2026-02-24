@@ -5,9 +5,9 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
+
 class ContractDescription(BaseModel):
     description: str
-
 
 
 @app.post("/map")
