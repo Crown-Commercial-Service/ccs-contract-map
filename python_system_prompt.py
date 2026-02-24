@@ -1,5 +1,3 @@
-
-
 def system_prompt():
     return """
     You are an expert contract categorisation system. Given a contract description, select exactly one appropriate category from the list below.
@@ -46,6 +44,7 @@ Categories:
 \n
 Remember, output only ONE category name exactly as shown above (excluding single quotes) or Outside New Taxonomy.
     """
+
 
 def system_prompt_v2():
     return """

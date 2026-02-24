@@ -8,7 +8,6 @@ from file_engineering.file_to_string import file_to_string_processor
 load_dotenv()
 
 
-
 llm = AzureChatOpenAI(
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
     openai_api_key=os.getenv("AZURE_OPENAI_KEY"),
@@ -23,9 +22,8 @@ llm = AzureChatOpenAI(
 )
 
 
-
 def contract_mapper(system_prompt_file_location, user_contract_description, llm=llm):
-    """ This function reads a description of a contract and labels it.
+    """This function reads a description of a contract and labels it.
 
     :param llm: AzureChatOpenAI model
     :param system_prompt_file_location: a text file containing the system prompt
@@ -34,8 +32,9 @@ def contract_mapper(system_prompt_file_location, user_contract_description, llm=
     """
     # get the AI prompt from the chosen text file containing prompt
     system_prompt_string = file_to_string_processor(system_prompt_file_location)
-    prompt = [SystemMessage(content=system_prompt_string) , HumanMessage(content=user_contract_description.strip())]
+    prompt = [
+        SystemMessage(content=system_prompt_string),
+        HumanMessage(content=user_contract_description.strip()),
+    ]
     response = llm.invoke(prompt)
     return response.content
-
-
