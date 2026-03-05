@@ -21,7 +21,7 @@ llm = AzureChatOpenAI(
 )
 
 
-def contract_mapper_v2(user_contract_description, llm=llm, system_prompt=SYSTEM_PROMPT):
+async def contract_mapper_v2(user_contract_description, llm=llm, system_prompt=SYSTEM_PROMPT):
     input_prompt = f"\n user input:{user_contract_description} "
     response = llm.invoke(system_prompt + input_prompt)
 
