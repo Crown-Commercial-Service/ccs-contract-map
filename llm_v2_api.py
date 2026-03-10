@@ -18,8 +18,7 @@ async def run_contract_mapper(body: ContractDescription):
         response = await contract_mapper_v2(user_contract_description=body.description)
         print(response)
         logger.info(response)
-        print("THIS WAS DEPLOYED")
-        return {"AI_label_deployed": response}
+        return {"AI_label": response}
     except Exception as e:
         print("Error:", e)
         return {"error": str(e)}
