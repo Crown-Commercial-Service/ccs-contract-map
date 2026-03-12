@@ -11,7 +11,7 @@ class ContractDescription(BaseModel):
     description: str
 
 
-system_prompt_file_location = Path.cwd() / "prompts/new_system_prompt.txt"
+system_prompt_file_location = Path.cwd() / "prompts/new_system_prompt.md"
 
 
 @app.post("/map")

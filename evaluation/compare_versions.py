@@ -1,7 +1,7 @@
-from src.core.classification_v1 import contract_mapper
+from core.classification_v1 import contract_mapper
 import pandas as pd
 from pathlib import Path
-from src.core.classification_v2 import contract_mapper_v2
+from core.classification_v2 import contract_mapper_v2
 
 """
 This script is used to check how well LLM classifies
@@ -28,7 +28,7 @@ list_results = []
 count_correct2 = 0
 list_results2 = []
 for description, category in zip(list_descriptions, list_category):
-    system_prompt_file_location = Path.cwd() / "prompts/new_system_prompt.txt"
+    system_prompt_file_location = Path.cwd() / "prompts/new_system_prompt.md"
     result = contract_mapper(
         system_prompt_file_location=system_prompt_file_location,
         user_contract_description=description,
