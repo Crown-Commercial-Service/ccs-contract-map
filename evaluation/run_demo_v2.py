@@ -1,4 +1,4 @@
-from contract_mapping_v2 import contract_mapper_v2
+from src.core.classification_v2 import contract_mapper_v2
 import pandas as pd
 from pathlib import Path
 
@@ -8,7 +8,9 @@ by looking at contract description
 """
 
 
-df = pd.read_csv(Path.cwd() / "AI Category Mapping - Category Desc Examples_new.csv")
+df = pd.read_csv(
+    Path.cwd() / "data/input/AI Category Mapping - Category Desc Examples_new.csv"
+)
 df = df.dropna(
     subset=["Description"]
 ).copy()  # in case anyone forgets to add a description
@@ -37,5 +39,5 @@ print(
 new_df = df[["Category", "Description"]].copy()
 new_df["AI classification"] = list_results
 
-new_df.to_csv("AI_v2_results_optimised.csv")
+new_df.to_csv("data/results/AI_v2_results_optimised.csv")
 print("experiment completed")

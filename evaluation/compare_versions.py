@@ -1,7 +1,7 @@
-from app import contract_mapper
+from src.core.classification_v1 import contract_mapper
 import pandas as pd
 from pathlib import Path
-from contract_mapping_v2 import contract_mapper_v2
+from src.core.classification_v2 import contract_mapper_v2
 
 """
 This script is used to check how well LLM classifies
@@ -12,7 +12,9 @@ stable and accurate.
 """
 
 
-df = pd.read_csv(Path.cwd() / "AI Category Mapping - Category Desc Examples_new.csv")
+df = pd.read_csv(
+    Path.cwd() / "data/input/AI Category Mapping - Category Desc Examples_new.csv"
+)
 df = df.dropna(
     subset=["Description"]
 ).copy()  # in case anyone forgets to add a description
@@ -26,7 +28,7 @@ list_results = []
 count_correct2 = 0
 list_results2 = []
 for description, category in zip(list_descriptions, list_category):
-    system_prompt_file_location = Path.cwd() / "new_system_prompt.txt"
+    system_prompt_file_location = Path.cwd() / "prompts/new_system_prompt.txt"
     result = contract_mapper(
         system_prompt_file_location=system_prompt_file_location,
         user_contract_description=description,
@@ -48,5 +50,5 @@ print(f" V2 accuracy:{(count_correct2/len(list_descriptions))*100}%")
 new_df = df[["Category", "Description"]].copy()
 new_df["LLM Version1"] = list_results
 new_df["LLM Version2"] = list_results2
-new_df.to_csv("AI_results.csv")
+new_df.to_csv("data/results/AI_results.csv")
 print("experiment completed")

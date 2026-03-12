@@ -1,14 +1,13 @@
-from contract_mapping_v2 import contract_mapper_v2
+from src.core.classification_v2 import contract_mapper_v2
 from fastapi import FastAPI
 from pydantic import BaseModel
 
 
-
 app = FastAPI()
+
 
 class ContractDescription(BaseModel):
     description: str
-
 
 
 @app.post("/map")

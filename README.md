@@ -3,15 +3,43 @@
 
 This repository provides a tool to automatically label contract descriptions using the CCS categories. It leverages a Large Language Model (LLM) to classify contract descriptions into predefined categories accurately and consistently.
 
+## Project Structure
+
+```
+ccs-contract-map/
+├── src/                           # Source code
+│   ├── core/                      # Core classification modules
+│   │   ├── classification_v1.py   # Version 1 (SystemMessage/HumanMessage)
+│   │   └── classification_v2.py   # Version 2 (string concatenation)
+│   └── api/                       # FastAPI endpoints
+│       ├── v1_endpoint.py         # API for version 1
+│       └── v2_endpoint.py         # API for version 2
+├── prompts/                       # System prompts
+│   ├── system_prompts.py          # Python prompt definitions
+│   ├── new_system_prompt.txt      # Text-based prompt
+│   └── contractmap_prompt_with_descriptions.txt
+├── evaluation/                    # Evaluation scripts
+│   ├── run_demo_v2.py            # Runs v2 classification
+│   ├── compare_versions.py       # Compares v1 vs v2
+│   └── prompt_engineering_experiment.ipynb
+├── utils/                         # Utility modules
+│   └── file_io/                  # File I/O utilities
+│       └── file_to_string.py
+├── data/                          # Data files
+│   ├── input/                    # Input datasets
+│   └── results/                  # Evaluation results
+└── tests/                        # Unit tests
+```
+
 ## Features
 
 - Uses a gpt-4.1-mini LLM for classification
-- There are 2 llm architecture one exists in `app.py` and the other one  in`contract_mapping_v2.py`, the
-difference is `app.py` uses role‑tagged messages (SystemMessage + HumanMessage) so instructions are treated as high‑priority and
-protected from user input, whereas the LLM in `contract_mapping_v2.py`sends one raw string with specified newlines that mixes instructions with content.
-- The LLM ran on 74 descriptions the LLM version 1  from `app.py` got accuracy of 87.67123287671232% and
- LLM version 2 from `contract_mapping_v2.py` got accuracy 89.04109589041096%. However, the LLM in `app.py`
-is safer because the LLM in `app.py`uses a SystemMessage separates instructions from user input,
+- There are 2 LLM architectures: Version 1 (in `src/core/classification_v1.py`) and Version 2 (in `src/core/classification_v2.py`)
+- Version 1 uses role‑tagged messages (SystemMessage + HumanMessage) so instructions are treated as high‑priority and
+protected from user input, whereas Version 2 sends one raw string with specified newlines that mixes instructions with content.
+- The LLM ran on 74 descriptions: Version 1 got accuracy of 87.67123287671232% and
+Version 2 got accuracy 89.04109589041096%. However, Version 1
+is safer because it uses a SystemMessage that separates instructions from user input,
 so the model treats those instructions as higher priority and they are harder for user text to override.
 This reduces the risk of prompt‑injection.
 
@@ -24,7 +52,7 @@ https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reproducible-ou
 
 recent experiment of LLM version 2 system prompt vs system prompt version 2 can be seen:
 here: https://docs.google.com/document/d/1faUwE-W7Eh3n6qg4sblHMjMtkmziJCG9/edit#heading=h.vigkhlj1brjf
-The experiment was ran using demo_script_v2.py
+The experiment was ran using `evaluation/run_demo_v2.py`
 
 ## How It Works
 
@@ -95,8 +123,8 @@ pytest -q
    - AZURE_OPENAI_KEY
    - DEPLOYMENT_NAME
 4. Make sure you have a AI Category Mapping csv that contain descriptions and what categories, make sure
-the columns are labelled as `Description` and `Category`. Please name the csv file `AI Category Mapping - Category Desc Examples_new.csv`
-5. to run experiment you can run on your IDE the file `experiment_mapping.py` which will output a csv called `AI_results.csv`
+the columns are labelled as `Description` and `Category`. Place this file in `data/input/AI Category Mapping - Category Desc Examples_new.csv`
+5. to run experiment you can run on your IDE the file `evaluation/compare_versions.py` which will output a csv to `data/results/AI_results.csv`
 
 ### From a jupyter notebook
 
