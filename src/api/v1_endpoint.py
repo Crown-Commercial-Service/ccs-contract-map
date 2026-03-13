@@ -1,4 +1,4 @@
-from app import contract_mapper
+from src.core.classification_v1 import contract_mapper
 from fastapi import FastAPI
 from pydantic import BaseModel
 from pathlib import Path
@@ -11,7 +11,7 @@ class ContractDescription(BaseModel):
     description: str
 
 
-system_prompt_file_location = Path.cwd() / "new_system_prompt.txt"
+system_prompt_file_location = Path.cwd() / "prompts/new_system_prompt.md"
 
 
 @app.post("/map")
