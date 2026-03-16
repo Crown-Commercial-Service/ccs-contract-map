@@ -19,9 +19,7 @@ ccs-contract-map/
 │   ├── new_system_prompt.txt      # Text-based prompt
 │   └── contractmap_prompt_with_descriptions.txt
 ├── evaluation/                    # Evaluation scripts
-│   ├── run_evaluation.py         # Unified evaluation CLI (v1 or v2)
-│   ├── run_demo_v2.py            # Legacy v2 demo
-│   ├── compare_versions.py       # Legacy v1 vs v2 comparison
+│   ├── run_evaluation.py          # Unified evaluation CLI (v1 or v2)
 │   └── prompt_engineering_experiment.ipynb
 ├── utils/                         # Utility modules
 │   └── file_io/                  # File I/O utilities
