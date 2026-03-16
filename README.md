@@ -19,8 +19,9 @@ ccs-contract-map/
 │   ├── new_system_prompt.txt      # Text-based prompt
 │   └── contractmap_prompt_with_descriptions.txt
 ├── evaluation/                    # Evaluation scripts
-│   ├── run_demo_v2.py            # Runs v2 classification
-│   ├── compare_versions.py       # Compares v1 vs v2
+│   ├── run_evaluation.py         # Unified evaluation CLI (v1 or v2)
+│   ├── run_demo_v2.py            # Legacy v2 demo
+│   ├── compare_versions.py       # Legacy v1 vs v2 comparison
 │   └── prompt_engineering_experiment.ipynb
 ├── utils/                         # Utility modules
 │   └── file_io/                  # File I/O utilities
@@ -124,7 +125,14 @@ pytest -q
    - DEPLOYMENT_NAME
 4. Make sure you have a AI Category Mapping csv that contain descriptions and what categories, make sure
 the columns are labelled as `Description` and `Category`. Place this file in `data/input/AI Category Mapping - Category Desc Examples_new.csv`
-5. to run experiment you can run on your IDE the file `evaluation/compare_versions.py` which will output a csv to `data/results/AI_results.csv`
+5. Run the unified evaluation script:
+```bash
+python evaluation/run_evaluation.py --mapper v2
+```
+Optional arguments:
+- `--truth-set /path/to/truth.csv` to use a different truth set file.
+- `--prompt system_prompt_v2.md` to choose a prompt from `prompts/`.
+- `--list-prompts` to print available prompt files.
 
 ### From a jupyter notebook
 
