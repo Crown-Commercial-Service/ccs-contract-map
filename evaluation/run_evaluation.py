@@ -66,12 +66,9 @@ async def _classify_description(description: str, mapper: str, prompt_file: Path
         )
 
     from core.classification_v2 import contract_mapper_v2
-    from utils.file_to_string import file_to_string_processor
-
-    system_prompt = file_to_string_processor(prompt_file)
     return await contract_mapper_v2(
         user_contract_description=description,
-        system_prompt=system_prompt,
+        system_prompt_file_location=prompt_file,
     )
 
 
