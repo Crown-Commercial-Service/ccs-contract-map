@@ -115,15 +115,14 @@ pytest -q
 ### From the terminal
 
 1. go into the repo folder in your command-line using `cd`
-2. run command `poetry install` (make sure you have poetry on your pc)
-3. create a `.env` file to load your azure credentials(name your credentials as shown below):
+2. create a `.env` file to load your azure credentials (name your credentials as shown below):
    - AZURE_OPENAI_API_VERSION
    - AZURE_OPENAI_ENDPOINT
    - AZURE_OPENAI_KEY
    - DEPLOYMENT_NAME
-4. Make sure you have a AI Category Mapping csv that contain descriptions and what categories, make sure
+3. Make sure you have a AI Category Mapping csv that contain descriptions and what categories, make sure
 the columns are labelled as `Description` and `Category`. Place this file in `data/input/AI Category Mapping - Category Desc Examples_new.csv`
-5. Run the unified evaluation script:
+4. Run the unified evaluation script:
 ```bash
 python evaluation/run_evaluation.py --mapper v2
 ```
