@@ -7,6 +7,43 @@ import pytest
 import evaluation.run_evaluation as run_evaluation
 
 
+class _DummyRunContext:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
+
+
+class FakeMLflow:
+    def __init__(self):
+        self.tracking_uri = None
+        self.experiment_name = None
+        self.start_run_name = None
+        self.params: dict[str, object] = {}
+        self.metrics: dict[str, float] = {}
+        self.artifacts: list[tuple[str, str]] = []
+
+    def set_tracking_uri(self, uri: str) -> None:
+        self.tracking_uri = uri
+
+    def set_experiment(self, name: str) -> None:
+        self.experiment_name = name
+
+    def start_run(self, run_name: str | None = None):
+        self.start_run_name = run_name
+        return _DummyRunContext()
+
+    def log_param(self, key: str, value) -> None:
+        self.params[key] = value
+
+    def log_metric(self, key: str, value: float) -> None:
+        self.metrics[key] = value
+
+    def log_artifact(self, path: str, artifact_path: str | None = None) -> None:
+        self.artifacts.append((path, artifact_path))
+
+
 def test_load_truth_set_raises_when_required_columns_missing(tmp_path):
     truth_set = tmp_path / "truth.csv"
     pd.DataFrame({"Description": ["desc only"]}).to_csv(truth_set, index=False)
@@ -49,6 +86,7 @@ def test_run_evaluation_writes_default_output_csv(monkeypatch, tmp_path):
     monkeypatch.setattr(run_evaluation, "REPO_ROOT", repo_root)
     monkeypatch.setattr(run_evaluation, "_resolve_prompt_file", lambda *args, **kwargs: prompt_file)
     monkeypatch.setattr(run_evaluation, "_classify_description", fake_classify)
+    monkeypatch.setattr(run_evaluation, "_get_mlflow_module", lambda: FakeMLflow())
 
     asyncio.run(
         run_evaluation.run_evaluation(
@@ -56,6 +94,7 @@ def test_run_evaluation_writes_default_output_csv(monkeypatch, tmp_path):
             mapper="v2",
             prompt_name=None,
             output_path=None,
+            mlflow_tracking_uri="azureml://unit-test",
         )
     )
 
@@ -84,41 +123,6 @@ def test_run_evaluation_logs_mlflow_params_metrics_and_artifacts(monkeypatch, tm
         mapping = {"desc-a": "cat-a", "desc-b": "wrong-cat"}
         return mapping[description]
 
-    class _DummyRunContext:
-        def __enter__(self):
-            return self
-
-        def __exit__(self, exc_type, exc, tb):
-            return False
-
-    class FakeMLflow:
-        def __init__(self):
-            self.tracking_uri = None
-            self.experiment_name = None
-            self.start_run_name = None
-            self.params: dict[str, object] = {}
-            self.metrics: dict[str, float] = {}
-            self.artifacts: list[tuple[str, str]] = []
-
-        def set_tracking_uri(self, uri: str) -> None:
-            self.tracking_uri = uri
-
-        def set_experiment(self, name: str) -> None:
-            self.experiment_name = name
-
-        def start_run(self, run_name: str | None = None):
-            self.start_run_name = run_name
-            return _DummyRunContext()
-
-        def log_param(self, key: str, value) -> None:
-            self.params[key] = value
-
-        def log_metric(self, key: str, value: float) -> None:
-            self.metrics[key] = value
-
-        def log_artifact(self, path: str, artifact_path: str | None = None) -> None:
-            self.artifacts.append((path, artifact_path))
-
     fake_mlflow = FakeMLflow()
     monkeypatch.setattr(run_evaluation, "_resolve_prompt_file", lambda *args, **kwargs: prompt_file)
     monkeypatch.setattr(run_evaluation, "_classify_description", fake_classify)
@@ -130,7 +134,6 @@ def test_run_evaluation_logs_mlflow_params_metrics_and_artifacts(monkeypatch, tm
             mapper="v2",
             prompt_name=None,
             output_path=output_path,
-            mlflow_enabled=True,
             mlflow_tracking_uri="http://mlflow.local:5000",
             mlflow_experiment_name="ContractMap-Evaluation-Test",
             mlflow_run_name="unit-test-run",
