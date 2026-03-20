@@ -6,8 +6,11 @@ import time
 from contextlib import nullcontext
 from pathlib import Path
 from typing import Any
+from dotenv import load_dotenv
 
 import pandas as pd
+
+load_dotenv()
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SRC_DIR = REPO_ROOT / "src"
@@ -19,7 +22,6 @@ DEFAULT_TRUTH_SET = (
 # Ensure imports work when running this file directly from repo root.
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
-
 
 
 def _available_prompt_files() -> list[Path]:
@@ -61,7 +63,9 @@ def _load_truth_set(truth_set_path: Path) -> pd.DataFrame:
     return df.dropna(subset=["Description", "Category"]).reset_index(drop=True)
 
 
-async def _classify_description(description: str, mapper: str, prompt_file: Path) -> str:
+async def _classify_description(
+    description: str, mapper: str, prompt_file: Path
+) -> str:
     if mapper == "v1":
         from core.classification_v1 import contract_mapper
 
@@ -71,6 +75,7 @@ async def _classify_description(description: str, mapper: str, prompt_file: Path
         )
 
     from core.classification_v2 import contract_mapper_v2
+
     return await contract_mapper_v2(
         user_contract_description=description,
         system_prompt_file_location=prompt_file,
@@ -78,6 +83,7 @@ async def _classify_description(description: str, mapper: str, prompt_file: Path
 
 
 def _get_mlflow_module() -> Any | None:
+    """Import Azure MLflow module (azureml-mlflow extends standard mlflow)."""
     try:
         import importlib
 
@@ -99,7 +105,8 @@ async def run_evaluation(
     mlflow_module = _get_mlflow_module() if mlflow_enabled else None
     if mlflow_enabled and mlflow_module is None:
         raise ModuleNotFoundError(
-            "MLflow is not installed. Install dependencies with 'pip install -r requirements.txt'."
+            "Azure MLflow is not installed. Install with 'pip install azureml-mlflow' "
+            "and authenticate using 'az login'."
         )
 
     prompt_file = _resolve_prompt_file(prompt_name=prompt_name, mapper=mapper)
@@ -155,7 +162,9 @@ async def run_evaluation(
 
         elapsed_seconds = time.perf_counter() - start_time
         accuracy = (correct / len(predictions)) * 100 if predictions else 0.0
-        print(f"\n{mapper.upper()} accuracy: {accuracy:.2f}% on {len(predictions)} samples")
+        print(
+            f"\n{mapper.upper()} accuracy: {accuracy:.2f}% on {len(predictions)} samples"
+        )
 
         result_df = df[["Category", "Description"]].copy()
         result_df["AI classification"] = predictions
@@ -209,25 +218,25 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--mlflow",
         action="store_true",
-        help="Enable MLflow experiment tracking.",
+        help="Enable Azure MLflow experiment tracking.",
     )
     parser.add_argument(
         "--mlflow-tracking-uri",
         type=str,
         default=None,
-        help="Optional MLflow tracking URI. Defaults to MLFLOW_TRACKING_URI or localhost.",
+        help="Optional Azure MLflow tracking URI (azureml:// scheme). Defaults to MLFLOW_TRACKING_URI env var.",
     )
     parser.add_argument(
         "--mlflow-experiment-name",
         type=str,
         default=None,
-        help="Optional MLflow experiment name. Defaults to MLFLOW_EXPERIMENT_NAME or ContractMap-Evaluation.",
+        help="Optional Azure MLflow experiment name. Defaults to MLFLOW_EXPERIMENT_NAME or ContractMap-Evaluation.",
     )
     parser.add_argument(
         "--mlflow-run-name",
         type=str,
         default=None,
-        help="Optional MLflow run name.",
+        help="Optional Azure MLflow run name.",
     )
     return parser
 
