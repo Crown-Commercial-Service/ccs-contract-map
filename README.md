@@ -130,6 +130,11 @@ Optional arguments:
 - `--truth-set /path/to/truth.csv` to use a different truth set file.
 - `--prompt system_prompt_v2.md` to choose a prompt from `prompts/`.
 - `--list-prompts` to print available prompt files.
+- `--mlflow-tracking-uri <azureml://...>` to set tracking server (or use `MLFLOW_TRACKING_URI`).
+- `--mlflow-experiment-name ContractMap-Evaluation` to set experiment (or use `MLFLOW_EXPERIMENT_NAME`).
+- `--mlflow-run-name my-run` to set a custom run name.
+
+`run_evaluation.py` always logs to MLflow (params, metrics, prompt, and results CSV).
 
 ### From a jupyter notebook
 
