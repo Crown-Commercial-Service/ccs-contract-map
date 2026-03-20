@@ -3,6 +3,7 @@ import asyncio
 import os
 import sys
 import time
+from contextlib import nullcontext
 from pathlib import Path
 from typing import Any
 from dotenv import load_dotenv
@@ -96,16 +97,19 @@ async def run_evaluation(
     mapper: str,
     prompt_name: str | None,
     output_path: Path | None,
+    mlflow_enabled: bool = False,
     mlflow_tracking_uri: str | None = None,
     mlflow_experiment_name: str | None = None,
     mlflow_run_name: str | None = None,
 ) -> None:
-    mlflow_module = _get_mlflow_module()
-    if mlflow_module is None:
-        raise ModuleNotFoundError(
-            "Azure MLflow is not installed. Install with 'pip install azureml-mlflow' "
-            "and authenticate using 'az login'."
-        )
+    mlflow_module = None
+    if mlflow_enabled:
+        mlflow_module = _get_mlflow_module()
+        if mlflow_module is None:
+            raise ModuleNotFoundError(
+                "Azure MLflow is not installed. Install with 'pip install azureml-mlflow' "
+                "and authenticate using 'az login'."
+            )
 
     prompt_file = _resolve_prompt_file(prompt_name=prompt_name, mapper=mapper)
     df = _load_truth_set(truth_set_path=truth_set_path)
@@ -120,26 +124,32 @@ async def run_evaluation(
         output_path = REPO_ROOT / f"data/results/eval_{mapper}_{prompt_file.stem}.csv"
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    tracking_uri = mlflow_tracking_uri or os.getenv("MLFLOW_TRACKING_URI")
-    if not tracking_uri:
-        raise ValueError(
-            "MLflow tracking URI is required. "
-            "Set --mlflow-tracking-uri or MLFLOW_TRACKING_URI."
+    if mlflow_enabled and mlflow_module is not None:
+        tracking_uri = mlflow_tracking_uri or os.getenv("MLFLOW_TRACKING_URI")
+        if not tracking_uri:
+            raise ValueError(
+                "MLflow tracking URI is required when --mlflow is set. "
+                "Set --mlflow-tracking-uri or MLFLOW_TRACKING_URI."
+            )
+        experiment_name = mlflow_experiment_name or os.getenv(
+            "MLFLOW_EXPERIMENT_NAME", "ContractMap-Evaluation"
         )
-    experiment_name = mlflow_experiment_name or os.getenv(
-        "MLFLOW_EXPERIMENT_NAME", "ContractMap-Evaluation"
-    )
-    mlflow_module.set_tracking_uri(tracking_uri)
-    mlflow_module.set_experiment(experiment_name)
-    run_context = mlflow_module.start_run(run_name=mlflow_run_name)
+        mlflow_module.set_tracking_uri(tracking_uri)
+        mlflow_module.set_experiment(experiment_name)
+        run_context = mlflow_module.start_run(run_name=mlflow_run_name)
+    else:
+        run_context = nullcontext()
 
     with run_context:
-        mlflow_module.log_param("mapper", mapper)
-        mlflow_module.log_param("truth_set_path", str(truth_set_path.resolve()))
-        mlflow_module.log_param("prompt_name", prompt_name or prompt_file.name)
-        mlflow_module.log_param("prompt_path", str(prompt_file.resolve()))
-        mlflow_module.log_param("num_samples", len(descriptions))
-        mlflow_module.log_artifact(str(prompt_file.resolve()), artifact_path="prompts")
+        if mlflow_enabled and mlflow_module is not None:
+            mlflow_module.log_param("mapper", mapper)
+            mlflow_module.log_param("truth_set_path", str(truth_set_path.resolve()))
+            mlflow_module.log_param("prompt_name", prompt_name or prompt_file.name)
+            mlflow_module.log_param("prompt_path", str(prompt_file.resolve()))
+            mlflow_module.log_param("num_samples", len(descriptions))
+            mlflow_module.log_artifact(
+                str(prompt_file.resolve()), artifact_path="prompts"
+            )
 
         start_time = time.perf_counter()
         for description, expected in zip(descriptions, categories):
@@ -167,11 +177,14 @@ async def run_evaluation(
         result_df.to_csv(output_path, index=False)
         print(f"Saved results to: {output_path}")
 
-        mlflow_module.log_metric("accuracy_percent", accuracy)
-        mlflow_module.log_metric("accuracy_fraction", accuracy / 100)
-        mlflow_module.log_metric("correct_predictions", correct)
-        mlflow_module.log_metric("evaluation_duration_seconds", elapsed_seconds)
-        mlflow_module.log_artifact(str(output_path.resolve()), artifact_path="results")
+        if mlflow_enabled and mlflow_module is not None:
+            mlflow_module.log_metric("accuracy_percent", accuracy)
+            mlflow_module.log_metric("accuracy_fraction", accuracy / 100)
+            mlflow_module.log_metric("correct_predictions", float(correct))
+            mlflow_module.log_metric("evaluation_duration_seconds", elapsed_seconds)
+            mlflow_module.log_artifact(
+                str(output_path.resolve()), artifact_path="results"
+            )
 
 
 def _build_arg_parser() -> argparse.ArgumentParser:
@@ -206,6 +219,11 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--list-prompts",
         action="store_true",
         help="List available prompt files in prompts/ and exit.",
+    )
+    parser.add_argument(
+        "--mlflow",
+        action="store_true",
+        help="Enable Azure MLflow experiment tracking.",
     )
     parser.add_argument(
         "--mlflow-tracking-uri",
@@ -244,6 +262,7 @@ def main() -> None:
             mapper=args.mapper,
             prompt_name=args.prompt,
             output_path=args.output,
+            mlflow_enabled=args.mlflow,
             mlflow_tracking_uri=args.mlflow_tracking_uri,
             mlflow_experiment_name=args.mlflow_experiment_name,
             mlflow_run_name=args.mlflow_run_name,
