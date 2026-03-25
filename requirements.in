@@ -1,5 +1,11 @@
+# Base Tools (Add these!)
+pip
+pip-tools
+
 # Core Framework
 langchain
+langchain-core
+langchain-community
 langchain-openai
 
 # Environment & Data
