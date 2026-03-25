@@ -1,0 +1,21 @@
+# Core Framework
+langchain
+langchain-openai
+
+# Environment & Data
+python-dotenv
+pandas
+
+# API & Server
+fastapi
+uvicorn
+
+# Azure Integration
+azureml-mlflow
+azure-ai-ml
+azure-identity
+
+# Development & Testing
+pytest
+ruff
+pre-commit
