@@ -1,4 +1,4 @@
-# ccs-contract-map
+# ccs-contract-map 
 
 
 This repository provides a tool to automatically label contract descriptions using the CCS categories. It leverages a Large Language Model (LLM) to classify contract descriptions into predefined categories accurately and consistently.
