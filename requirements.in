@@ -7,19 +7,23 @@ langchain
 langchain-core
 langchain-community
 langchain-openai
+pydantic-ai-slim[openai,google,groq]==1.59.0
 
 # Environment & Data
 python-dotenv
 pandas
+openpyxl
 
 # API & Server
 fastapi
 uvicorn
+git+https://github.com/DavisAgyemang/ccss_web_api_tool.git
 
 # Azure Integration
 azureml-mlflow
 azure-ai-ml
 azure-identity
+azure-search-documents
 
 # Development & Testing
 pytest

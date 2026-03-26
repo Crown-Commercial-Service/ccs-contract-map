@@ -26,8 +26,6 @@ If the contract does not fit any category, respond with **Outside New Taxonomy**
 
 * **Facilities Management**: Building maintenance, cleaning, security, logistics, furniture, healthcare soft FM.
 
-* **Low Value**: Low monetary value contracts not classified elsewhere.
-
 * **Cloud and Hosting**: Cloud computing, hosting, G-Cloud framework services.
 
 * **Digital and Technology Services**: Digital transformation, cybersecurity, IT services, software testing and development.

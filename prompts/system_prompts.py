@@ -23,8 +23,6 @@ Categories:
 \n
 * 'Facilities Management': Building maintenance, cleaning, security, logistics, furniture, healthcare soft FM.
 \n
-* 'Low Value': Low monetary value contracts not classified elsewhere.
-\n
 * 'Cloud and Hosting': Cloud computing, hosting, G-Cloud framework services.
 \n
 * 'Digital and Technology Services': Digital transformation, cybersecurity, IT services, software testing and development.
@@ -65,8 +63,7 @@ def system_prompt_v2():
 * 'Travel, Accommodation and Venues': Travel arrangements, accommodation, and venue services.
 * 'Construction': Building works, emergency repairs, architectural and engineering services related to building and infrastructure projects, materials supply (Use if the primary scope is the *building* itself, not the equipment inside).
 * 'Energy': Electricity, gas, fuel supply, power purchase agreements, water, wastewater services.
-* **'Facilities Management': Building maintenance (Hard FM: HVAC, electrical, plumbing), cleaning, security, logistics, furniture, maintenance, repair, and ongoing support of specialized operational equipment (e.g., medical devices, lab equipment, manufacturing machinery), healthcare soft FM.**
-* **'Low Value': (LAST RESORT ONLY)** Low monetary value contracts not classified elsewhere. Do NOT use if a specific category (e.g., HR, Energy) clearly applies.
+* **'Facilities Management': Building maintenance (Hard FM: HVAC, electrical, plumbing), cleaning, security, logistics, furniture, maintenance, repair, and ongoing support of specialized operational equipment (e.g., medical devices, lab equipment, manufacturing machinery), healthcare soft FM.
 * 'Cloud and Hosting': Cloud computing, hosting, G-Cloud framework services (XaaS).
 * 'Digital and Technology Services': Digital transformation, cybersecurity, IT services, software testing and development (High-level strategy and bespoke software services).
 * **'Network Services': Installation, management, and support of passive (cabling) and active (switches, routers) network infrastructure,** audiovisual consultancy, network connectivity, mobile/data services.

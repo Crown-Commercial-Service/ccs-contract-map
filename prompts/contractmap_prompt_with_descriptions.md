@@ -24,8 +24,6 @@ You are a system that categorises contracts based on their descriptions. The val
 
 * **Facilities Management**: Buying Better Food and Drink, Courier and Specialist Movements, Estate Management Services, Facilities Management and Workplace Services, Facilities Management and Workplace Services DPS, Furniture and Associated Services, Healthcare Soft FM, Housing Maintenance and Repair, Logistics, Warehousing and Supply Chain Solutions, Office Solutions, Postal Services & Solutions, Security - Physical, Technical and Support Services, Storage, Distribution, Kitting and Associated Services
 
-* **Low Value**
-
 * **Cloud and Hosting**: Cloud Compute, Crown Hosting ll, G-Cloud4; G-Cloud4 Lot
 
 * **Digital and Technology Services**: Cyber Security Services; Digital & Legacy Spplication Services, Digital Capability for Health, Digital Capability for Health, Digital Outcomes; Digital Specialists and Programmes, Digital and IT Professional Services, Quality Assurance and Testing for IT Systems, Software Design and Implementation Services, Spark DPS, Technology Services, Transport Technology & Associated Services, Vehicle Charging Infrastructure Solutions

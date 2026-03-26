@@ -16,6 +16,8 @@ annotated-types==0.7.0
     # via pydantic
 anyio==4.13.0
     # via
+    #   google-genai
+    #   groq
     #   httpx
     #   openai
     #   starlette
@@ -29,7 +31,9 @@ attrs==26.1.0
 azure-ai-ml==1.32.0
     # via -r requirements.in
 azure-common==1.1.28
-    # via azure-ai-ml
+    # via
+    #   azure-ai-ml
+    #   azure-search-documents
 azure-core==1.39.0
     # via
     #   azure-ai-ml
@@ -38,6 +42,7 @@ azure-core==1.39.0
     #   azure-mgmt-core
     #   azure-monitor-opentelemetry
     #   azure-monitor-opentelemetry-exporter
+    #   azure-search-documents
     #   azure-storage-blob
     #   azure-storage-file-datalake
     #   azure-storage-file-share
@@ -58,6 +63,8 @@ azure-monitor-opentelemetry==1.8.7
     # via azure-ai-ml
 azure-monitor-opentelemetry-exporter==1.0.0b49
     # via azure-monitor-opentelemetry
+azure-search-documents==11.6.0
+    # via -r requirements.in
 azure-storage-blob==12.27.1
     # via
     #   azure-ai-ml
@@ -69,10 +76,14 @@ azure-storage-file-share==12.24.0
     # via azure-ai-ml
 azureml-mlflow==1.62.0.post1
     # via -r requirements.in
+beautifulsoup4==4.14.3
+    # via ccs-web-api
 build==1.4.2
     # via pip-tools
 cachetools==6.2.6
     # via mlflow-skinny
+ccs-web-api @ git+https://github.com/DavisAgyemang/ccss_web_api_tool.git
+    # via -r requirements.in
 certifi==2026.2.25
     # via
     #   httpcore
@@ -93,7 +104,9 @@ click==8.3.1
 cloudpickle==3.1.2
     # via mlflow-skinny
 colorama==0.4.6
-    # via azure-ai-ml
+    # via
+    #   azure-ai-ml
+    #   griffecli
 cryptography==46.0.5
     # via
     #   azure-identity
@@ -110,7 +123,12 @@ dataclasses-json==0.6.7
 distlib==0.4.0
     # via virtualenv
 distro==1.9.0
-    # via openai
+    # via
+    #   google-genai
+    #   groq
+    #   openai
+et-xmlfile==2.0.0
+    # via openpyxl
 fastapi==0.135.2
     # via
     #   -r requirements.in
@@ -123,12 +141,28 @@ frozenlist==1.8.0
     # via
     #   aiohttp
     #   aiosignal
+genai-prices==0.0.56
+    # via pydantic-ai-slim
 gitdb==4.0.12
     # via gitpython
 gitpython==3.1.46
     # via mlflow-skinny
-google-auth==2.49.1
-    # via databricks-sdk
+google-auth[requests]==2.49.1
+    # via
+    #   databricks-sdk
+    #   google-genai
+google-genai==1.68.0
+    # via pydantic-ai-slim
+griffe==2.0.1
+    # via pydantic-ai-slim
+griffecli==2.0.1
+    # via griffe
+griffelib==2.0.1
+    # via
+    #   griffe
+    #   griffecli
+groq==1.1.2
+    # via pydantic-ai-slim
 h11==0.16.0
     # via
     #   httpcore
@@ -137,9 +171,14 @@ httpcore==1.0.9
     # via httpx
 httpx==0.28.1
     # via
+    #   genai-prices
+    #   google-genai
+    #   groq
     #   langgraph-sdk
     #   langsmith
     #   openai
+    #   pydantic-ai-slim
+    #   pydantic-graph
 httpx-sse==0.4.3
     # via langchain-community
 identify==2.6.18
@@ -159,6 +198,7 @@ iniconfig==2.3.0
 isodate==0.7.2
     # via
     #   azure-ai-ml
+    #   azure-search-documents
     #   azure-storage-blob
     #   azure-storage-file-datalake
     #   azure-storage-file-share
@@ -211,6 +251,8 @@ langsmith==0.7.22
     #   langchain-classic
     #   langchain-community
     #   langchain-core
+logfire-api==4.30.0
+    # via pydantic-graph
 marshmallow==3.26.2
     # via
     #   azure-ai-ml
@@ -242,7 +284,11 @@ numpy==2.4.3
 oauthlib==3.3.1
     # via requests-oauthlib
 openai==2.29.0
-    # via langchain-openai
+    # via
+    #   langchain-openai
+    #   pydantic-ai-slim
+openpyxl==3.1.5
+    # via -r requirements.in
 opentelemetry-api==1.40.0
     # via
     #   azure-core-tracing-opentelemetry
@@ -262,6 +308,7 @@ opentelemetry-api==1.40.0
     #   opentelemetry-instrumentation-wsgi
     #   opentelemetry-sdk
     #   opentelemetry-semantic-conventions
+    #   pydantic-ai-slim
 opentelemetry-instrumentation==0.61b0
     # via
     #   opentelemetry-instrumentation-asgi
@@ -350,7 +397,9 @@ packaging==25.0
     #   pytest
     #   wheel
 pandas==3.0.1
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   ccs-web-api
 pip-tools==7.5.3
     # via -r requirements.in
 platformdirs==4.9.4
@@ -381,6 +430,9 @@ pycparser==3.0
 pydantic==2.12.5
     # via
     #   fastapi
+    #   genai-prices
+    #   google-genai
+    #   groq
     #   langchain
     #   langchain-classic
     #   langchain-core
@@ -388,9 +440,15 @@ pydantic==2.12.5
     #   langsmith
     #   mlflow-skinny
     #   openai
+    #   pydantic-ai-slim
+    #   pydantic-graph
     #   pydantic-settings
+pydantic-ai-slim[google,groq,openai]==1.59.0
+    # via -r requirements.in
 pydantic-core==2.41.5
     # via pydantic
+pydantic-graph==1.59.0
+    # via pydantic-ai-slim
 pydantic-settings==2.13.1
     # via langchain-community
 pydash==8.0.6
@@ -438,7 +496,10 @@ regex==2026.2.28
 requests==2.32.5
     # via
     #   azure-core
+    #   ccs-web-api
     #   databricks-sdk
+    #   google-auth
+    #   google-genai
     #   langchain-classic
     #   langchain-community
     #   langsmith
@@ -463,7 +524,12 @@ six==1.17.0
 smmap==5.0.3
     # via gitdb
 sniffio==1.3.1
-    # via openai
+    # via
+    #   google-genai
+    #   groq
+    #   openai
+soupsieve==2.8.3
+    # via beautifulsoup4
 sqlalchemy==2.0.48
     # via
     #   langchain-classic
@@ -476,10 +542,13 @@ strictyaml==1.7.3
     # via azure-ai-ml
 tenacity==9.1.4
     # via
+    #   google-genai
     #   langchain-community
     #   langchain-core
 tiktoken==0.12.0
-    # via langchain-openai
+    # via
+    #   langchain-openai
+    #   pydantic-ai-slim
 tqdm==4.67.3
     # via
     #   azure-ai-ml
@@ -491,10 +560,14 @@ typing-extensions==4.15.0
     #   azure-ai-ml
     #   azure-core
     #   azure-identity
+    #   azure-search-documents
     #   azure-storage-blob
     #   azure-storage-file-datalake
     #   azure-storage-file-share
+    #   beautifulsoup4
     #   fastapi
+    #   google-genai
+    #   groq
     #   langchain-core
     #   mlflow-skinny
     #   openai
@@ -515,6 +588,8 @@ typing-inspection==0.4.2
     # via
     #   fastapi
     #   pydantic
+    #   pydantic-ai-slim
+    #   pydantic-graph
     #   pydantic-settings
 urllib3==2.6.3
     # via requests
@@ -528,6 +603,8 @@ uvicorn==0.42.0
     #   mlflow-skinny
 virtualenv==21.2.0
     # via pre-commit
+websockets==16.0
+    # via google-genai
 wheel==0.46.3
     # via pip-tools
 wrapt==1.17.3
