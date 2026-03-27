@@ -2,7 +2,7 @@ from langchain_openai import AzureChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
 from dotenv import load_dotenv
 import os
-from src.utils.file_to_string import file_to_string_processor
+from utils.file_to_string import file_to_string_processor
 
 
 load_dotenv()
