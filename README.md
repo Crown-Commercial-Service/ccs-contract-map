@@ -59,6 +59,24 @@ The experiment was ran using `evaluation/run_demo_v2.py`
 2. Processing: LLM uses the system prompt to understand how to categorise the given contract description
 3. Output: A single CCS category label that best fits the contract description is outputted by LLM
 
+## How To Install Locally
+
+1. Create a venv:
+```
+python -m venv venv
+```
+2. Load the venv:
+```
+source venv/bin/activate
+```
+3. Update pip:
+```
+python -m pip install --upgrade pip
+```
+4. Install the dependencies:
+```
+python -m pip install -r requirements.txt
+```
 
 ## Developer Tooling (Pre-commit, Ruff, pytest)
 
@@ -67,20 +85,6 @@ This project uses:
 - [pre-commit](https://pre-commit.com/) for running checks automatically before each commit.
 - [Ruff](https://docs.astral.sh/ruff/) for fast linting.
 - [pytest](https://docs.pytest.org/) for unit testing.
-
-### Install tooling
-
-If you already installed dependencies from `requirements.txt`, install the remaining developer tools:
-
-```bash
-python -m pip install pre-commit ruff
-```
-
-Or install all at once:
-
-```bash
-python -m pip install -r requirements.txt pre-commit ruff
-```
 
 ### Set up pre-commit hooks
 
