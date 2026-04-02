@@ -1,10 +1,20 @@
 import  pandas as pd
 
 from src.core.classification_v3_mix_v5 import keywords_and_llm
+from src.core.classification_v3 import contract_mapper_v3
 import ast
 
-data = pd.read_excel("AI Catrgorisation Testing Notes.xlsx")
-data_to_analyse = data[data["Correct Match "].notna()].iloc[0:30]
+data = pd.read_excel("AI Catrgorisation Testing Notes2.xlsx")
+drop_1 = data.iloc[0:8].index# remove rows where it does not matter what label the model gives
+drop_2 = data.iloc[170:181].index # remove rows where it does not matter what label the model gives
+
+all_to_drop = drop_1.union(drop_2)
+new_data = data.drop(all_to_drop)
+
+
+data_to_analyse = new_data[new_data["Correct Match "].notna()].iloc[10:106]
+
+
 print(len(data_to_analyse))
 # todo apply RAG to the data see if can label
 # data_to_analyse["AI_CategoryMatchV3"] =
@@ -29,5 +39,6 @@ accuracy = data_to_analyse["AI_CategoryMatchV3"] == data_to_analyse["Correct Mat
 
 correct_count = accuracy.sum()
 total_count = len(accuracy)
+old_model_correct_df = data_to_analyse[data_to_analyse["AI_CategoryMatch"] == data_to_analyse["Correct Match "]]
 print(f"Total Analyzed: {total_count}")
-print(f"Correct Matches: {correct_count}")
+print(f"Correct Matches: {correct_count}, Old model total correct matches: {len(old_model_correct_df)}")
