@@ -5,7 +5,7 @@ from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 from dotenv import load_dotenv
 import hashlib
-from src.utils.llm_data_summariser import  summarise_llm
+from oldcode.llm_data_summariser import  summarise_llm
 
 load_dotenv()
 
@@ -27,25 +27,32 @@ client = SearchClient(
     credential=AzureKeyCredential(os.getenv("VECTOR_STORE_KEY")),
 )
 
+categories = set(extra_context_data["category"])
+categories.discard("Low Value")
+print(categories)
+for category in categories:
+    categorical_data = extra_context_data[extra_context_data["category"]== category]
+    categorical_data_log = " "
+    for index, row in categorical_data.iterrows():
+        print(index)
+        print(category)
+        raw_text = f"""
+        Framework Title: {row['title']}
+        Framework Code: {row['rm_number']}
+        Category: {row['category']}
+        Pillar: {row['pillar']}
+        Summary: {row['summary']}
+        Detailed Description: {row['description']}
+        Specific Services/Lots: {row['lots']}
+        Keywords: {row['keywords']}
+        \n
+        """
+        categorical_data_log = categorical_data_log + raw_text
 
-for index, row in extra_context_data.iterrows():
-    print(index)
-    raw_text = f"""
-    Framework Title: {row['title']}
-    Framework Code: {row['rm_number']}
-    Category: {row['category']}
-    Pillar: {row['pillar']}
-    Summary: {row['summary']}
-    Detailed Description: {row['description']}
-    Specific Services/Lots: {row['lots']}
-    Keywords: {row['keywords']}
-    """
-    summarised_text = summarise_llm(raw_text)
-    print(summarised_text)
-    id_string = row['title']
-    unique_id = hashlib.md5(id_string.encode("utf-8")).hexdigest()
-    ccs_label = row["category"]
-
+    summarised_text = summarise_llm(categorical_data_log)
+    categorical_data_log = " "
+    unique_id = hashlib.md5(category.encode("utf-8")).hexdigest()
+    ccs_label = category
     embedded_chunk = embed.embed_query(summarised_text)
     docs = [{
         "id":unique_id,
@@ -57,7 +64,5 @@ for index, row in extra_context_data.iterrows():
 
     client.upload_documents(documents=docs)
     print("Completed")
-
-
 
 

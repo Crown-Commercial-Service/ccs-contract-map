@@ -14,12 +14,13 @@ from pathlib import Path
 load_dotenv()
 
 DEFAULT_SYSTEM_PROMPT_FILE = (
-    Path(__file__).parent.parent.parent / "prompts/system_prompt_v3.md"
+    Path(__file__).parent.parent.parent / "prompts/system_prompt_v6.md"
 )
 
 
 class ContractMapV3(BaseModel):
-    ccs_label: str = Field(description="The chosen category of the contract. If no categories in the RULES match the description, return 'Outside Taxonomy'.")
+    ccs_label: str = Field(description="The chosen category of the contract. If no categories in the RULES match the description, return 'Outside New Taxonomy'.")
+    reasoning: str = Field(description="Briefly why you picked this category.")
 
 
 
@@ -28,6 +29,7 @@ pydantic_azure_client = AsyncAzureOpenAI(
     api_key=os.getenv("AZURE_OPENAI_KEY"),
     azure_deployment=os.getenv("DEPLOYMENT_NAME"),
     api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+
 )
 model = OpenAIChatModel(
     model_name=os.getenv("DEPLOYMENT_NAME"),
@@ -74,12 +76,18 @@ def get_rules_from_azure(description):
     return rules_text
 
 
+
+
 def contract_mapper_v3(contract_description):
     relevant_rules = get_rules_from_azure(contract_description)
     llm = Agent(
         model=model,
         output_type=ContractMapV3,
-        model_settings=ModelSettings(temperature=0.0),
+        model_settings=ModelSettings(temperature=0.0,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0,
+        seed=42),
     )
     with open(DEFAULT_SYSTEM_PROMPT_FILE, "r", encoding="utf-8") as f:
         raw_prompt_template = f.read()
@@ -91,10 +99,10 @@ def contract_mapper_v3(contract_description):
     )
 
     result = llm.run_sync(prompt)
-    return result.output.ccs_label
+    return result.output.ccs_label , result.output.reasoning
 
 
-if __name__ == "__main__":
-    my_contract = "Network Rail BAPA - Bidston Moss Viaduct : This is for a Basic Asset Protection Agreement on a structure to carry out statutory safety inspection and essential maintenance works. Network Rail is the owner and infrastructure manager of the railway network and as such no alternative suppliers are available."
-    label = contract_mapper_v3(my_contract)
-    print(f"The Label is: {label}")
+# if __name__ == "__main__":
+#     my_contract = "Network Rail BAPA - Bidston Moss Viaduct : This is for a Basic Asset Protection Agreement on a structure to carry out statutory safety inspection and essential maintenance works. Network Rail is the owner and infrastructure manager of the railway network and as such no alternative suppliers are available."
+#     label, reasoning = contract_mapper_v3(my_contract)
+#     print(f"The Label is: {label}")
