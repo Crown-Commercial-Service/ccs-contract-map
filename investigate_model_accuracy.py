@@ -12,7 +12,7 @@ all_to_drop = drop_1.union(drop_2)
 new_data = data.drop(all_to_drop)
 
 
-data_to_analyse = new_data[new_data["Correct Match "].notna()].iloc[10:106]
+data_to_analyse = new_data[new_data["Correct Match "].notna()].iloc[0:669]
 
 
 print(len(data_to_analyse))
@@ -35,10 +35,12 @@ for index, row in data_to_analyse.iterrows():
 
 
 data_to_analyse["AI_CategoryMatchV3"] =output
+data_to_analyse.to_excel("new_AI_results.xlsx", index=False)
 accuracy = data_to_analyse["AI_CategoryMatchV3"] == data_to_analyse["Correct Match "]
 
 correct_count = accuracy.sum()
 total_count = len(accuracy)
 old_model_correct_df = data_to_analyse[data_to_analyse["AI_CategoryMatch"] == data_to_analyse["Correct Match "]]
 print(f"Total Analyzed: {total_count}")
-print(f"Correct Matches: {correct_count}, Old model total correct matches: {len(old_model_correct_df)}")
+print(f"Correct Matches: {correct_count}, Old model total correct matches: {len(old_model_correct_df)/total_count*100}%")
+print(f"Correct Matches %: {(correct_count/total_count)*100}, Old model total correct matches%: {len(old_model_correct_df)/total_count*100}%")

@@ -50,6 +50,6 @@ async def contract_mapper_v2(
     )
 
     input_prompt = f"\n user input:{user_contract_description} "
-    response = llm.invoke(resolved_system_prompt + input_prompt)
+    response =  llm.invoke(resolved_system_prompt + input_prompt)
 
     return response.content
