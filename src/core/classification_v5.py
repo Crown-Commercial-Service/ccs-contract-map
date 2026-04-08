@@ -1,7 +1,7 @@
 import json
 import re
 from pathlib import Path
-path = Path(__file__).parents[2] / "semantic_anchors3.json"
+path = Path(__file__).parents[2] / "semantic_anchors4.json"
 
 class HeuristicClassifier:
     def __init__(self, registry_path:Path = None):
@@ -14,7 +14,7 @@ class HeuristicClassifier:
         with open(self.registry_path, "r", encoding="utf-8") as f:
             return json.load(f)
 
-    def classify(self, description: str, threshold: int = 15):
+    def classify(self, description: str, threshold: int = 15, margin: int = 6):
         """
         Scores the description against each category.
         Primary match = 3 points
@@ -36,7 +36,10 @@ class HeuristicClassifier:
             for word in primary_list:
                 # \b ensures we match exact words only
                 if re.search(rf"\b{re.escape(word.lower())}\b", desc_lower):
-                    score += 3
+                    if word.lower().startswith("rm"):
+                        score += 50  # Instant win
+                    else:
+                        score += 5
 
 
             # Check Secondary Keywords (Supporting Context)
@@ -47,25 +50,46 @@ class HeuristicClassifier:
 
             category_scores[category] = score
 
-        if not category_scores:
+        if not category_scores or sum(category_scores.values()) == 0:
             return None, 0
 
-        # Find the category with the highest score
-        best_category = max(category_scores, key=category_scores.get)
-        max_score = category_scores[best_category]
-        print(max_score)
+        # 3. Rank results to find the winner and the runner-up
+        sorted_results = sorted(category_scores.items(), key=lambda x: x[1], reverse=True)
 
-        # Only return a match if it meets your confidence threshold
-        if max_score >= threshold:
-            return best_category, max_score
+        best_cat, best_score = sorted_results[0]
+        second_score = sorted_results[1][1] if len(sorted_results) > 1 else 0
 
-        return None, max_score
+        # --- CONFIDENCE LOGIC ---
+
+        # Rule A: Must meet minimum threshold
+        if best_score < threshold:
+            return None, best_score
+
+        # Rule B: Margin of Victory
+        # If the gap between 1st and 2nd place is too small, it's ambiguous.
+        if (best_score - second_score) < margin:
+            # We return None so the async loop falls back to the LLM
+            print(f"Ambiguity detected ({best_cat} {best_score} vs {second_score}). Forcing LLM.")
+            return None, best_score
+
+        return best_cat, best_score
+
+        # # Find the category with the highest score
+        # best_category = max(category_scores, key=category_scores.get)
+        # max_score = category_scores[best_category]
+        # print(max_score)
+        #
+        # # Only return a match if it meets your confidence threshold
+        # if max_score >= threshold:
+        #     return best_category, max_score
+        #
+        # return None, max_score
 
 
 # # --- Example Usage ---
 # if __name__ == "__main__":
 #     # Point to your generated JSON
-#     path_new = Path(__file__).parents[2] / "semantic_anchors.json"
+#     path_new = Path(__file__).parents[2] / "semantic_anchors4.json"
 #     classifier = HeuristicClassifier(path_new)
 #
 #     test_description = "Pool water recovery systems and rainwater harvesting"
