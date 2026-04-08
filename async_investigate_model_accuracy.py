@@ -15,7 +15,7 @@ all_to_drop = drop_1.union(drop_2)
 new_data = data.drop(all_to_drop)
 print("length:", len(new_data))
 # Filter for labeled data and take a sample for testing
-data_to_analyse = new_data[new_data["Correct Match "].notna()].iloc[0:780].copy()
+data_to_analyse = new_data[new_data["Correct Match "].notna()].iloc[0:781].copy()
 
 
 async def run_classification_test(df):
@@ -77,7 +77,14 @@ async def run_classification_test(df):
     print(f"Old model total correct accuracy%: {len(old_model_correct_df)/total_count*100}%")
 
     # Save to Excel
-    output_file = "new_AI_results_threshold15_imprv2.xlsx"
+    df = df[[
+        "contract_title",
+        "ContractDescription",
+        "Correct Match ",
+        "AI_CategoryMatch",
+        "AI_CategoryMatchV3",
+    ]]
+    output_file = "new_AI_results_clean_data.xlsx"
     df.to_excel(output_file, index=False)
     print(f"Results saved to {output_file}")
 
