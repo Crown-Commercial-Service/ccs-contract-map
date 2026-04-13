@@ -5,10 +5,10 @@ from src.core.classification_v5 import HeuristicClassifier
 # This loads the JSON into memory only once when the app starts
 GLOBAL_CLASSIFIER = HeuristicClassifier()
 
-async def keywords_and_llm(description: str):
+async def keywords_and_llm(description: str, threshold: int, margin: int):
     # 1. Use the pre-loaded global classifier
     # We pass the threshold (25) and margin (6) directly to the method
-    result, score = GLOBAL_CLASSIFIER.classify(description, threshold=15, margin=6)
+    result, score = GLOBAL_CLASSIFIER.classify(description, threshold=threshold, margin=margin)
 
     # 2. Check the result
     # If 'result' is None, it means the score was too low OR it was a 'Tie'
