@@ -1,0 +1,27 @@
+# Base Tools (Add these!)
+pip
+pip-tools
+
+# Core Framework
+langchain
+langchain-core
+langchain-community
+langchain-openai
+
+# Environment & Data
+python-dotenv
+pandas
+
+# API & Server
+fastapi
+uvicorn
+
+# Azure Integration
+azureml-mlflow
+azure-ai-ml
+azure-identity
+
+# Development & Testing
+pytest
+ruff
+pre-commit

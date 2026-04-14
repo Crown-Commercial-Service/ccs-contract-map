@@ -1,0 +1,14 @@
+.env
+venv/*
+*.csv
+*.xlsx
+**/__pycache__
+**egg-info
+*.DS_Store
+*ipynb_checkpoints
+*.vscode
+.github/instructions/
+.idea/
+Davis_atamis_test.xlsx
+nhs_data_evaluation.py
+tenders_experiment.ipynb
