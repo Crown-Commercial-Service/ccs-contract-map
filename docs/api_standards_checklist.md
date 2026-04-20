@@ -64,4 +64,4 @@ This document assesses the Contract Mapper API against the [GOV.UK API technical
 6. **[FEATURE] Caching Strategy for AI Inference**
    * *Requirement:* Implement a caching layer to store results for identical contract descriptions, reducing redundant AI processing and Azure compute costs.
 7. **[TASK] Register with API Catalogue**
-   * *Requirement:* Ensure the Contract Mapper metadata is added to the relevant internal and cross-government API catalogues for discoverability.rement:* Implement a caching layer to store results for identical contract descriptions, reducing redundant AI processing and Azure compute costs.
+   * *Requirement:* Investigate how to register to the API catalogue for contract map. Once the investigation is complete submit app to the API catalogue 
