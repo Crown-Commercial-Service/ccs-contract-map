@@ -1,36 +1,48 @@
 import pandas as pd
 import asyncio
 import ast
-from pathlib import Path
 from src.core.classification_v2_mix_v5 import keywords_and_llm
 
+
 # --- Configuration & Data Loading ---
-file_path = "AI Catrgorisation Testing Notes2.xlsx"
+file_path = "new_AI_results_for_Jasmine.xlsx"
 data = pd.read_excel(file_path)
 
-# Cleaning logic based on your specific row indices
-drop_1 = data.iloc[0:8].index
-drop_2 = data.iloc[170:181].index
-all_to_drop = drop_1.union(drop_2)
-new_data = data.drop(all_to_drop)
-print("length:", len(new_data))
-# Filter for labeled data and take a sample for testing
-data_to_analyse = new_data[new_data["Correct Match "].notna()].iloc[0:781].copy()
+# 1. Clean the 'Correct Match' column
+# This converts '&' to 'and' and removes extra trailing spaces
+data["Correct Match "] = (
+    data["Correct Match "]
+    .astype(str)
+    .str.replace(r"\s*&\s*", " and ", regex=True)
+    .str.replace(r"\s+", " ", regex=True) # Remove double spaces
+    .str.strip()
+)
 
+# 2. Fix specific singular/plural or inconsistent names
+# Based on your failure list, standardise these specific strings
+normalization_map = {
+    "Network Service": "Network Services",
+    "Cloud & Hosting": "Cloud and Hosting",
+    "HR & Workforce Services": "HR and Workforce Services",
+    "Digital & Technology Services": "Digital and Technology Services"
+}
+
+data["Correct Match "] = data["Correct Match "].replace(normalization_map)
+data["AI_CategoryMatch"] = data["AI_CategoryMatch"].replace(normalization_map)
 
 async def run_classification_test(df):
     """
     Async loop to process each row through the Hybrid Classifier.
     """
     output_labels = []
-    output_reasons = []
+    wrong_results = {}
 
     print(f"Starting analysis on {len(df)} rows...")
 
     for index, row in df.iterrows():
         print(f"--- Processing Row: {index} ---")
 
-        # 1. Safely parse the ContractDescription dictionary string
+        # Safely parse the ContractDescription dictionary string
         try:
             description_raw = row["ContractDescription"]
             # Handle cases where it might already be a dict or needs parsing
@@ -44,24 +56,23 @@ async def run_classification_test(df):
             print(f"Warning: Could not parse description at index {index}: {e}")
             clean_desc = str(row["ContractDescription"])
 
-        # 2. Build the combined text for the classifier
-        # We combine title and description for maximum keyword context
+        # Build the combined text for the classifier
+        # Combine title and description for maximum keyword context
         contract_text = f"{row['contract_title']} : {clean_desc}"
 
-        # 3. Call the Hybrid Classifier (AWAIT required for the LLM fallback)
-        # result = category label, reason = "Heuristic Match" or "LLM Categorization"
-        result, reason = await keywords_and_llm(contract_text)
+        result, reason = await keywords_and_llm(description=contract_text, threshold=10, margin=0)
+
+        if result != row["Correct Match "]:
+            wrong_results[str(index)] = {"description": row["ContractDescription"], "AI_label": result, "Actual_label": row["Correct Match "]}
 
         output_labels.append(result)
-        output_reasons.append(reason)
 
         print(f"AI Prediction: {result}")
         print(f"Actual Label:  {row['Correct Match ']}")
-        print(f"Method:        {reason}\n")
 
-    # 4. Update the DataFrame and save
+
+    #Update the DataFrame and save
     df["AI_CategoryMatchV3"] = output_labels
-    df["Classification_Method"] = output_reasons
 
     # Accuracy Calculations
     accuracy_series = df["AI_CategoryMatchV3"] == df["Correct Match "]
@@ -76,19 +87,14 @@ async def run_classification_test(df):
     print(f"Old model total correct matches: {len(old_model_correct_df)}")
     print(f"Old model total correct accuracy%: {len(old_model_correct_df)/total_count*100}%")
 
-    # Save to Excel
-    df = df[[
-        "contract_title",
-        "ContractDescription",
-        "Correct Match ",
-        "AI_CategoryMatch",
-        "AI_CategoryMatchV3",
-    ]]
-    output_file = "new_AI_results_clean_data.xlsx"
+
+    output_file = "new_AI_results_keywords_llm.xlsx"
     df.to_excel(output_file, index=False)
     print(f"Results saved to {output_file}")
+    print(wrong_results)
+    print()
+    print(len(wrong_results))
 
 
 if __name__ == "__main__":
-    # This entry point starts the asyncio event loop
-    asyncio.run(run_classification_test(data_to_analyse))
+    asyncio.run(run_classification_test(data))

@@ -144,3 +144,9 @@ Optional arguments:
 4. Open the notebook `prompt_engineering_experiment.ipynb`
 
 **Note:** if your browser doesn't automatically load the jupyter lab landing page, you may need to follow the link that is displayed in the terminal instead
+
+### To Run experiments
+
+If you want to run any experiment you must have these csv/excel spreadsheets:
+- AI Catrgorisation Testing Notes.xlsx (You can ask the AI team for this)
+- new_AI_results_for_Jasmine.xlsx(You can ask the AI team for this) 

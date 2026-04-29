@@ -1,7 +1,7 @@
 import json
 import re
 from pathlib import Path
-path = Path(__file__).parents[2] / "semantic_anchors4.json"
+path = Path(__file__).parents[2] / "semantic_anchors.json"
 
 class HeuristicClassifier:
     def __init__(self, registry_path:Path = None):
@@ -89,7 +89,7 @@ class HeuristicClassifier:
 # # --- Example Usage ---
 # if __name__ == "__main__":
 #     # Point to your generated JSON
-#     path_new = Path(__file__).parents[2] / "semantic_anchors4.json"
+#     path_new = Path(__file__).parents[2] / "semantic_anchors.json"
 #     classifier = HeuristicClassifier(path_new)
 #
 #     test_description = "Pool water recovery systems and rainwater harvesting"
