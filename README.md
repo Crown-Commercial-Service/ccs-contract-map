@@ -55,9 +55,10 @@ The experiment was ran using `evaluation/run_demo_v2.py`
 
 ## How It Works
 
-1. Input:LLM is given a contract description text
-2. Processing: LLM uses the system prompt to understand how to categorise the given contract description
-3. Output: A single CCS category label that best fits the contract description is outputted by LLM
+Contractmap is a hybrid keyword + LLM system. When a contract description is passed in, the following happens:
+1. Keyword Matching: the description is searched for the occurrence of keywords that are relevant to each category. If enough keywords are found for a given category (as defined by the threshold value), and there is not a similar number of keywords for another category (with "similar" defined by the margin value), that category is chosen as the match for the description.
+2. LLM (optional): if there is no single category that achieves a high enough keyword matching score, the description is passed to an LLM, which uses its understanding of natural language to assign the contract to a GCA category.
+Once this process finishes, the system returns a single CCS category name.
 
 
 ## Developer Tooling (Pre-commit, Ruff, pytest)
