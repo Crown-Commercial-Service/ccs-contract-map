@@ -14,7 +14,7 @@ data["Correct Match "] = (
     data["Correct Match "]
     .astype(str)
     .str.replace(r"\s*&\s*", " and ", regex=True)
-    .str.replace(r"\s+", " ", regex=True) # Remove double spaces
+    .str.replace(r"\s+", " ", regex=True)  # Remove double spaces
     .str.strip()
 )
 
@@ -24,11 +24,12 @@ normalization_map = {
     "Network Service": "Network Services",
     "Cloud & Hosting": "Cloud and Hosting",
     "HR & Workforce Services": "HR and Workforce Services",
-    "Digital & Technology Services": "Digital and Technology Services"
+    "Digital & Technology Services": "Digital and Technology Services",
 }
 
 data["Correct Match "] = data["Correct Match "].replace(normalization_map)
 data["AI_CategoryMatch"] = data["AI_CategoryMatch"].replace(normalization_map)
+
 
 async def run_classification_test(df):
     """
@@ -60,18 +61,23 @@ async def run_classification_test(df):
         # Combine title and description for maximum keyword context
         contract_text = f"{row['contract_title']} : {clean_desc}"
 
-        result, reason = await keywords_and_llm(description=contract_text, threshold=10, margin=0)
+        result, reason = await keywords_and_llm(
+            description=contract_text, threshold=10, margin=0
+        )
 
         if result != row["Correct Match "]:
-            wrong_results[str(index)] = {"description": row["ContractDescription"], "AI_label": result, "Actual_label": row["Correct Match "]}
+            wrong_results[str(index)] = {
+                "description": row["ContractDescription"],
+                "AI_label": result,
+                "Actual_label": row["Correct Match "],
+            }
 
         output_labels.append(result)
 
         print(f"AI Prediction: {result}")
         print(f"Actual Label:  {row['Correct Match ']}")
 
-
-    #Update the DataFrame and save
+    # Update the DataFrame and save
     df["AI_CategoryMatchV3"] = output_labels
 
     # Accuracy Calculations
@@ -80,13 +86,14 @@ async def run_classification_test(df):
     total_count = len(df)
     accuracy_pct = (correct_count / total_count) * 100
     old_model_correct_df = df[df["AI_CategoryMatch"] == df["Correct Match "]]
-    print(f"--- Test Results ---")
+    print("--- Test Results ---")
     print(f"Total Analyzed: {total_count}")
     print(f"Correct Matches: {correct_count}")
     print(f"Accuracy: {accuracy_pct:.2f}%")
     print(f"Old model total correct matches: {len(old_model_correct_df)}")
-    print(f"Old model total correct accuracy%: {len(old_model_correct_df)/total_count*100}%")
-
+    print(
+        f"Old model total correct accuracy%: {len(old_model_correct_df)/total_count*100}%"
+    )
 
     output_file = "new_AI_results_keywords_llm.xlsx"
     df.to_excel(output_file, index=False)

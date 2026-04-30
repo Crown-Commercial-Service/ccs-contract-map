@@ -13,7 +13,9 @@ class ContractDescription(BaseModel):
 @app.post("/map")
 async def run_contract_mapper(body: ContractDescription):
     try:
-        response, _ = await keywords_and_llm(description=body.description, threshold=10, margin=0)
+        response, _ = await keywords_and_llm(
+            description=body.description, threshold=10, margin=0
+        )
         print(response)
         return {"AI_label": response}
     except Exception as e:

@@ -6,7 +6,9 @@ import json
 
 # --- CONFIGURATION ---
 corpus_location = Path(__file__).parents[2] / "AI Catrgorisation Testing Notes.xlsx"
-registry_path = Path(__file__).parents[2] / "semantic_anchors2.json"# doing this not overwrite current version
+registry_path = (
+    Path(__file__).parents[2] / "semantic_anchors2.json"
+)  # doing this not overwrite current version
 
 # --- DATA PREPARATION ---
 data = pd.read_excel(str(corpus_location))
@@ -19,20 +21,22 @@ data_to_analyse["Correct Match "] = (
     .str.strip()
 )
 
-data_to_analyse["Correct Match "] = data_to_analyse["Correct Match "].replace({
-    "Network Service": "Network Services"
-})
+data_to_analyse["Correct Match "] = data_to_analyse["Correct Match "].replace(
+    {"Network Service": "Network Services"}
+)
 
 
 def extract_description(val):
     try:
         d = ast.literal_eval(val)
-        return d.get('description', '')
+        return d.get("description", "")
     except (ValueError, SyntaxError, AttributeError):
         return ""
 
 
-data_to_analyse['clean_description'] = data_to_analyse['ContractDescription'].apply(extract_description)
+data_to_analyse["clean_description"] = data_to_analyse["ContractDescription"].apply(
+    extract_description
+)
 
 # --- KEYWORD EXTRACTION LOOP ---
 grouped_data = data_to_analyse.groupby("Correct Match ")
@@ -43,13 +47,16 @@ for category, group in grouped_data:
     primary_store = set()
     secondary_store = set()
 
-    for text in group['clean_description'].tolist():
+    for text in group["clean_description"].tolist():
         # Using the LLM to find keywords for each individual contract
         primary, secondary = keywords_finder_llm(text)
         primary_store.update(primary)
         secondary_store.update(secondary)
 
-    registry[category] = {"primary": list(primary_store), "secondary": list(secondary_store)}
+    registry[category] = {
+        "primary": list(primary_store),
+        "secondary": list(secondary_store),
+    }
 
 # --- 1. GLOBAL DE-DUPLICATION ---
 word_ownership = {}
@@ -82,15 +89,19 @@ if "Outside New Taxonomy" in registry:
     real_category_words = set()
     for cat, content in registry.items():
         if cat != "Outside New Taxonomy":
-            real_category_words.update([w.lower().strip() for w in content[0]])  # Primary
-            real_category_words.update([w.lower().strip() for w in content[1]])  # Secondary
+            real_category_words.update(
+                [w.lower().strip() for w in content[0]]
+            )  # Primary
+            real_category_words.update(
+                [w.lower().strip() for w in content[1]]
+            )  # Secondary
 
     o_primary, o_secondary = registry["Outside New Taxonomy"]
 
     # Remove words from 'Outside' if they exist anywhere else in the real taxonomy
     registry["Outside New Taxonomy"] = [
         [w for w in o_primary if w.lower().strip() not in real_category_words],
-        [w for w in o_secondary if w.lower().strip() not in real_category_words]
+        [w for w in o_secondary if w.lower().strip() not in real_category_words],
     ]
     print("Purged overlapping keywords from 'Outside New Taxonomy'.")
 
@@ -107,12 +118,20 @@ MAX_CATEGORIES = 3
 final_cleaned_registry = {}
 
 for cat, (primary, secondary) in registry.items():
-    clean_p = [w for w in primary if global_word_frequency[w.lower().strip()] <= MAX_CATEGORIES]
-    clean_s = [w for w in secondary if global_word_frequency[w.lower().strip()] <= MAX_CATEGORIES]
+    clean_p = [
+        w for w in primary if global_word_frequency[w.lower().strip()] <= MAX_CATEGORIES
+    ]
+    clean_s = [
+        w
+        for w in secondary
+        if global_word_frequency[w.lower().strip()] <= MAX_CATEGORIES
+    ]
     final_cleaned_registry[cat] = [clean_p, clean_s]
 
 # --- FINAL SAVE ---
 with open(registry_path, "w", encoding="utf-8") as f:
     json.dump(final_cleaned_registry, f, indent=4, ensure_ascii=False)
 
-print(f"Successfully saved {len(final_cleaned_registry)} cleaned categories to {registry_path}")
+print(
+    f"Successfully saved {len(final_cleaned_registry)} cleaned categories to {registry_path}"
+)

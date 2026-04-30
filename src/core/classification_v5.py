@@ -1,10 +1,12 @@
 import json
 import re
 from pathlib import Path
+
 path = Path(__file__).parents[2] / "semantic_anchors.json"
 
+
 class HeuristicClassifier:
-    def __init__(self, registry_path:Path = None):
+    def __init__(self, registry_path: Path = None):
         self.registry_path = registry_path
         if registry_path is None:
             self.registry_path = path
@@ -41,12 +43,10 @@ class HeuristicClassifier:
                     else:
                         score += 5
 
-
             # Check Secondary Keywords (Supporting Context)
             for word in secondary_list:
                 if re.search(rf"\b{re.escape(word.lower())}\b", desc_lower):
                     score += 1
-
 
             category_scores[category] = score
 
@@ -54,7 +54,9 @@ class HeuristicClassifier:
             return None, 0
 
         # 3. Rank results to find the winner and the runner-up
-        sorted_results = sorted(category_scores.items(), key=lambda x: x[1], reverse=True)
+        sorted_results = sorted(
+            category_scores.items(), key=lambda x: x[1], reverse=True
+        )
 
         best_cat, best_score = sorted_results[0]
         second_score = sorted_results[1][1] if len(sorted_results) > 1 else 0
@@ -69,7 +71,9 @@ class HeuristicClassifier:
         # If the gap between 1st and 2nd place is too small, it's ambiguous.
         if (best_score - second_score) < margin:
             # We return None so the async loop falls back to the LLM
-            print(f"Ambiguity detected ({best_cat} {best_score} vs {second_score}). Forcing LLM.")
+            print(
+                f"Ambiguity detected ({best_cat} {best_score} vs {second_score}). Forcing LLM."
+            )
             return None, best_score
 
         return best_cat, best_score

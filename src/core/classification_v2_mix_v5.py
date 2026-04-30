@@ -4,9 +4,11 @@ from src.core.classification_v5 import HeuristicClassifier
 
 GLOBAL_CLASSIFIER = HeuristicClassifier()
 
-async def keywords_and_llm(description: str, threshold: int, margin: int):
 
-    result, score = GLOBAL_CLASSIFIER.classify(description, threshold=threshold, margin=margin)
+async def keywords_and_llm(description: str, threshold: int, margin: int):
+    result, score = GLOBAL_CLASSIFIER.classify(
+        description, threshold=threshold, margin=margin
+    )
 
     # 2. Check the result
     # If 'result' is None, it means the score was too low OR it was a 'Tie'
@@ -20,4 +22,4 @@ async def keywords_and_llm(description: str, threshold: int, margin: int):
 
     result_llm = await contract_mapper_v2(description)
 
-    return result_llm, f"LLM used"
+    return result_llm, "LLM used"

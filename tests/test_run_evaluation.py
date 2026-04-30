@@ -84,7 +84,9 @@ def test_run_evaluation_writes_default_output_csv(monkeypatch, tmp_path):
         return mapping[description]
 
     monkeypatch.setattr(run_evaluation, "REPO_ROOT", repo_root)
-    monkeypatch.setattr(run_evaluation, "_resolve_prompt_file", lambda *args, **kwargs: prompt_file)
+    monkeypatch.setattr(
+        run_evaluation, "_resolve_prompt_file", lambda *args, **kwargs: prompt_file
+    )
     monkeypatch.setattr(run_evaluation, "_classify_description", fake_classify)
     monkeypatch.setattr(run_evaluation, "_get_mlflow_module", lambda: FakeMLflow())
 
@@ -124,7 +126,9 @@ def test_run_evaluation_logs_mlflow_params_metrics_and_artifacts(monkeypatch, tm
         return mapping[description]
 
     fake_mlflow = FakeMLflow()
-    monkeypatch.setattr(run_evaluation, "_resolve_prompt_file", lambda *args, **kwargs: prompt_file)
+    monkeypatch.setattr(
+        run_evaluation, "_resolve_prompt_file", lambda *args, **kwargs: prompt_file
+    )
     monkeypatch.setattr(run_evaluation, "_classify_description", fake_classify)
     monkeypatch.setattr(run_evaluation, "_get_mlflow_module", lambda: fake_mlflow)
 
