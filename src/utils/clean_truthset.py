@@ -28,7 +28,7 @@ def clean_and_normalize_data(input_path: Path) -> None:
     data = pd.read_excel(input_path)
 
     # Validate required columns
-    required_cols = {"Correct Match ", "ContractDescription", "contract_title"}
+    required_cols = {"Title", "Description", "Category"}
     missing = required_cols.difference(data.columns)
     if missing:
         raise ValueError(
@@ -38,11 +38,11 @@ def clean_and_normalize_data(input_path: Path) -> None:
 
     print(f"Loaded {len(data)} rows")
 
-    # 1. Clean the 'Correct Match ' column
+    # 1. Clean the 'Category' column
     # Convert '&' to 'and' and remove extra trailing spaces
-    print("Normalizing 'Correct Match ' column...")
-    data["Correct Match "] = (
-        data["Correct Match "]
+    print("Normalizing 'Category' column...")
+    data["Category"] = (
+        data["Category"]
         .astype(str)
         .str.replace(r"\s*&\s*", " and ", regex=True)
         .str.replace(r"\s+", " ", regex=True)  # Remove double spaces
@@ -58,7 +58,7 @@ def clean_and_normalize_data(input_path: Path) -> None:
     }
 
     print(f"Applying {len(normalization_map)} normalization rules...")
-    data["Correct Match "] = data["Correct Match "].replace(normalization_map)
+    data["Category"] = data["Category"].replace(normalization_map)
 
     # Also normalize AI_CategoryMatch if it exists
     if "AI_CategoryMatch" in data.columns:
@@ -67,9 +67,7 @@ def clean_and_normalize_data(input_path: Path) -> None:
 
     # Remove rows with missing required data
     initial_count = len(data)
-    data = data.dropna(subset=["Correct Match ", "ContractDescription"]).reset_index(
-        drop=True
-    )
+    data = data.dropna(subset=["Category", "Description"]).reset_index(drop=True)
     dropped_count = initial_count - len(data)
 
     if dropped_count > 0:
@@ -81,10 +79,10 @@ def clean_and_normalize_data(input_path: Path) -> None:
     print(f"Final row count: {len(data)}")
 
     # Show unique categories
-    unique_categories = sorted(data["Correct Match "].unique())
+    unique_categories = sorted(data["Category"].unique())
     print(f"\nUnique categories ({len(unique_categories)}):")
     for cat in unique_categories:
-        count = (data["Correct Match "] == cat).sum()
+        count = (data["Category"] == cat).sum()
         print(f"  - {cat}: {count} rows")
 
 

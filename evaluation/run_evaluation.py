@@ -53,11 +53,11 @@ def _get_mlflow_module() -> Any | None:
         return None
 
 
-def _load_truth_set(truth_set_path: Path) -> pd.DataFrame:
-    if not truth_set_path.exists():
-        raise FileNotFoundError(f"Truth set file not found: {truth_set_path}")
+def _load_truthset(truthset_path: Path) -> pd.DataFrame:
+    if not truthset_path.exists():
+        raise FileNotFoundError(f"Truth set file not found: {truthset_path}")
 
-    df = pd.read_csv(truth_set_path)
+    df = pd.read_csv(truthset_path)
     required_cols = {"Description", "Category"}
     missing = required_cols.difference(df.columns)
     if missing:
@@ -69,7 +69,7 @@ def _load_truth_set(truth_set_path: Path) -> pd.DataFrame:
 
 
 def _parse_contract_description(description_raw: Any) -> str:
-    """Safely parse the ContractDescription dictionary string."""
+    """Safely parse the Description dictionary string."""
     try:
         # Handle cases where it might already be a dict or needs parsing
         if isinstance(description_raw, str):
@@ -83,8 +83,8 @@ def _parse_contract_description(description_raw: Any) -> str:
         return str(description_raw)
 
 
-async def run_classification_test(
-    input_path: Path,
+async def evaluate_truthset(
+    truthset_path: Path,
     output_path: Path | None,
     threshold: int,
     margin: int,
@@ -97,7 +97,7 @@ async def run_classification_test(
     Run classification test with MLflow tracking.
 
     Args:
-        input_path: Path to input Excel file
+        truthset_path: Path to input Excel file
         output_path: Path to save output results (Excel)
         threshold: Keyword threshold for classification_v2_mix_v5
         margin: Margin parameter for classification_v2_mix_v5
@@ -120,7 +120,7 @@ async def run_classification_test(
     from core.classification_v2_mix_v5 import keywords_and_llm
 
     # Load and normalize data
-    df = _load_truth_set(truth_set_path=input_path)
+    df = _load_truthset(truthset_path=truthset_path)
 
     # Set default output path
     if output_path is None:
@@ -145,7 +145,7 @@ async def run_classification_test(
 
     with run_context:
         # Log parameters
-        mlflow_module.log_param("input_file", str(input_path.resolve()))
+        mlflow_module.log_param("truthset_path", str(truthset_path.resolve()))
         mlflow_module.log_param("num_samples", len(df))
         mlflow_module.log_param("threshold", threshold)
         mlflow_module.log_param("margin", margin)
@@ -168,11 +168,11 @@ async def run_classification_test(
             print(f"--- Processing Row: {index} ---")
 
             # Parse contract description
-            clean_desc = _parse_contract_description(row["ContractDescription"])
+            clean_desc = _parse_contract_description(row["Description"])
 
             # Build the combined text for the classifier
             # Combine title and description for maximum keyword context
-            contract_text = f"{row['contract_title']} : {clean_desc}"
+            contract_text = f"{row['Title']} : {clean_desc}"
 
             # Run classification with system prompt for LLM fallback
             result, reason = await keywords_and_llm(
@@ -183,18 +183,18 @@ async def run_classification_test(
             )
 
             # Track wrong results
-            if result != row["Correct Match "]:
+            if result != row["Category"]:
                 wrong_results[str(index)] = {
-                    "description": row["ContractDescription"],
+                    "description": row["Description"],
                     "AI_label": result,
-                    "Actual_label": row["Correct Match "],
+                    "Actual_label": row["Category"],
                     "reason": reason,
                 }
 
             output_labels.append(result)
 
             print(f"AI Prediction: {result}")
-            print(f"Actual Label:  {row['Correct Match ']}")
+            print(f"Actual Label:  {row['Category']}")
 
         elapsed_seconds = time.perf_counter() - start_time
 
@@ -202,7 +202,7 @@ async def run_classification_test(
         df["AI_CategoryMatchV3"] = output_labels
 
         # Accuracy Calculations
-        accuracy_series = df["AI_CategoryMatchV3"] == df["Correct Match "]
+        accuracy_series = df["AI_CategoryMatchV3"] == df["Category"]
         correct_count = accuracy_series.sum()
         total_count = len(df)
         accuracy_pct = (correct_count / total_count) * 100
@@ -210,7 +210,7 @@ async def run_classification_test(
         # Compare with old model if available
         old_model_accuracy_pct = None
         if "AI_CategoryMatch" in df.columns:
-            old_model_correct_df = df[df["AI_CategoryMatch"] == df["Correct Match "]]
+            old_model_correct_df = df[df["AI_CategoryMatch"] == df["Category"]]
             old_model_correct_count = len(old_model_correct_df)
             old_model_accuracy_pct = (old_model_correct_count / total_count) * 100
             print(f"Old model total correct matches: {old_model_correct_count}")
@@ -262,10 +262,10 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         description="Run contract mapping evaluation with keywords_and_llm classifier and MLflow tracking."
     )
     parser.add_argument(
-        "--input",
+        "--truthset",
         type=Path,
         default=DEFAULT_INPUT_FILE,
-        help="Path to input Excel file with columns: Correct Match , ContractDescription, contract_title.",
+        help="Path to truthset Excel file with columns: Title, Description, Category.",
     )
     parser.add_argument(
         "--output",
@@ -328,8 +328,8 @@ def main() -> None:
         return
 
     asyncio.run(
-        run_classification_test(
-            input_path=args.input,
+        evaluate_truthset(
+            truthset_path=args.truthset,
             output_path=args.output,
             threshold=args.threshold,
             margin=args.margin,
