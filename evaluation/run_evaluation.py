@@ -1,5 +1,6 @@
 import argparse
 import asyncio
+import ast
 import os
 import sys
 import time
@@ -14,9 +15,8 @@ load_dotenv()
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SRC_DIR = REPO_ROOT / "src"
 PROMPTS_DIR = REPO_ROOT / "prompts"
-DEFAULT_TRUTH_SET = (
-    REPO_ROOT / "data/input/AI Category Mapping - Category Desc Examples_new.csv"
-)
+DEFAULT_INPUT_FILE = REPO_ROOT / "new_AI_results_for_Jasmine.xlsx"
+DEFAULT_SYSTEM_PROMPT = "system_prompt_v2.md"
 
 # Ensure imports work when running this file directly from repo root.
 if str(SRC_DIR) not in sys.path:
@@ -24,61 +24,23 @@ if str(SRC_DIR) not in sys.path:
 
 
 def _available_prompt_files() -> list[Path]:
+    """List available prompt files in the prompts directory."""
     files = sorted(PROMPTS_DIR.glob("*.md"))
     return [path for path in files if path.is_file()]
 
 
-def _resolve_prompt_file(prompt_name: str | None, mapper: str) -> Path:
-    defaults = {
-        "v1": "new_system_prompt.md",
-        "v2": "system_prompt_v2.md",
-    }
-
-    selected_name = prompt_name or defaults[mapper]
-    prompt_file = PROMPTS_DIR / selected_name
+def _resolve_prompt_file(prompt_name: str) -> Path:
+    """Resolve prompt file path from name."""
+    prompt_file = PROMPTS_DIR / prompt_name
 
     if not prompt_file.exists():
         available = ", ".join(path.name for path in _available_prompt_files())
         raise FileNotFoundError(
-            f"Prompt '{selected_name}' not found in '{PROMPTS_DIR}'. "
+            f"Prompt '{prompt_name}' not found in '{PROMPTS_DIR}'. "
             f"Available prompts: {available}"
         )
 
     return prompt_file
-
-
-def _load_truth_set(truth_set_path: Path) -> pd.DataFrame:
-    if not truth_set_path.exists():
-        raise FileNotFoundError(f"Truth set file not found: {truth_set_path}")
-
-    df = pd.read_csv(truth_set_path)
-    required_cols = {"Description", "Category"}
-    missing = required_cols.difference(df.columns)
-    if missing:
-        raise ValueError(
-            f"Truth set must include columns {sorted(required_cols)}. Missing: {sorted(missing)}"
-        )
-
-    return df.dropna(subset=["Description", "Category"]).reset_index(drop=True)
-
-
-async def _classify_description(
-    description: str, mapper: str, prompt_file: Path
-) -> str:
-    if mapper == "v1":
-        from core.classification_v1 import contract_mapper
-
-        return contract_mapper(
-            system_prompt_file_location=prompt_file,
-            user_contract_description=description,
-        )
-
-    from core.classification_v2 import contract_mapper_v2
-
-    return await contract_mapper_v2(
-        user_contract_description=description,
-        system_prompt_file_location=prompt_file,
-    )
 
 
 def _get_mlflow_module() -> Any | None:
@@ -91,15 +53,90 @@ def _get_mlflow_module() -> Any | None:
         return None
 
 
-async def run_evaluation(
-    truth_set_path: Path,
-    mapper: str,
-    prompt_name: str | None,
+def _load_and_normalize_data(input_path: Path) -> pd.DataFrame:
+    """Load data from Excel and apply normalization rules."""
+    if not input_path.exists():
+        raise FileNotFoundError(f"Input file not found: {input_path}")
+
+    # Load data from Excel
+    data = pd.read_excel(input_path)
+
+    # Validate required columns
+    required_cols = {"Correct Match ", "ContractDescription", "contract_title"}
+    missing = required_cols.difference(data.columns)
+    if missing:
+        raise ValueError(
+            f"Input file must include columns {sorted(required_cols)}. Missing: {sorted(missing)}"
+        )
+
+    # 1. Clean the 'Correct Match ' column
+    # This converts '&' to 'and' and removes extra trailing spaces
+    data["Correct Match "] = (
+        data["Correct Match "]
+        .astype(str)
+        .str.replace(r"\s*&\s*", " and ", regex=True)
+        .str.replace(r"\s+", " ", regex=True)  # Remove double spaces
+        .str.strip()
+    )
+
+    # 2. Fix specific singular/plural or inconsistent names
+    # Based on failure list, standardize these specific strings
+    normalization_map = {
+        "Network Service": "Network Services",
+        "Cloud & Hosting": "Cloud and Hosting",
+        "HR & Workforce Services": "HR and Workforce Services",
+        "Digital & Technology Services": "Digital and Technology Services",
+    }
+
+    data["Correct Match "] = data["Correct Match "].replace(normalization_map)
+
+    # Normalize AI_CategoryMatch if it exists
+    if "AI_CategoryMatch" in data.columns:
+        data["AI_CategoryMatch"] = data["AI_CategoryMatch"].replace(normalization_map)
+
+    return data.dropna(subset=["Correct Match ", "ContractDescription"]).reset_index(
+        drop=True
+    )
+
+
+def _parse_contract_description(description_raw: Any) -> str:
+    """Safely parse the ContractDescription dictionary string."""
+    try:
+        # Handle cases where it might already be a dict or needs parsing
+        if isinstance(description_raw, str):
+            description_dict = ast.literal_eval(description_raw)
+        else:
+            description_dict = description_raw
+
+        return description_dict.get("description", "")
+    except (ValueError, SyntaxError, AttributeError) as e:
+        print(f"Warning: Could not parse description: {e}")
+        return str(description_raw)
+
+
+async def run_classification_test(
+    input_path: Path,
     output_path: Path | None,
+    threshold: int,
+    margin: int,
+    prompt_name: str,
     mlflow_tracking_uri: str | None = None,
     mlflow_experiment_name: str | None = None,
     mlflow_run_name: str | None = None,
 ) -> None:
+    """
+    Run classification test with MLflow tracking.
+
+    Args:
+        input_path: Path to input Excel file
+        output_path: Path to save output results (Excel)
+        threshold: Keyword threshold for classification_v2_mix_v5
+        margin: Margin parameter for classification_v2_mix_v5
+        prompt_name: System prompt file name for LLM fallback
+        mlflow_tracking_uri: Azure MLflow tracking URI
+        mlflow_experiment_name: MLflow experiment name
+        mlflow_run_name: MLflow run name
+    """
     mlflow_module = _get_mlflow_module()
     if mlflow_module is None:
         raise ModuleNotFoundError(
@@ -107,19 +144,23 @@ async def run_evaluation(
             "and authenticate using 'az login'."
         )
 
-    prompt_file = _resolve_prompt_file(prompt_name=prompt_name, mapper=mapper)
-    df = _load_truth_set(truth_set_path=truth_set_path)
+    # Resolve prompt file
+    prompt_file = _resolve_prompt_file(prompt_name)
 
-    descriptions = df["Description"].astype(str).tolist()
-    categories = df["Category"].astype(str).tolist()
+    # Import classification function
+    from core.classification_v2_mix_v5 import keywords_and_llm
 
-    predictions: list[str] = []
-    correct = 0
+    # Load and normalize data
+    df = _load_and_normalize_data(input_path=input_path)
 
+    # Set default output path
     if output_path is None:
-        output_path = REPO_ROOT / f"data/results/eval_{mapper}_{prompt_file.stem}.csv"
+        output_path = (
+            REPO_ROOT / f"data/results/eval_keywords_llm_t{threshold}_m{margin}.xlsx"
+        )
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
+    # Configure MLflow
     tracking_uri = mlflow_tracking_uri or os.getenv("MLFLOW_TRACKING_URI")
     if not tracking_uri:
         raise ValueError(
@@ -127,80 +168,159 @@ async def run_evaluation(
             "Set --mlflow-tracking-uri or MLFLOW_TRACKING_URI."
         )
     experiment_name = mlflow_experiment_name or os.getenv(
-        "MLFLOW_EXPERIMENT_NAME", "ContractMap-Evaluation"
+        "MLFLOW_EXPERIMENT_NAME", "ContractMap-KeywordLLM-Evaluation"
     )
     mlflow_module.set_tracking_uri(tracking_uri)
     mlflow_module.set_experiment(experiment_name)
     run_context = mlflow_module.start_run(run_name=mlflow_run_name)
 
     with run_context:
-        mlflow_module.log_param("mapper", mapper)
-        mlflow_module.log_param("truth_set_path", str(truth_set_path.resolve()))
-        mlflow_module.log_param("prompt_name", prompt_name or prompt_file.name)
+        # Log parameters
+        mlflow_module.log_param("input_file", str(input_path.resolve()))
+        mlflow_module.log_param("num_samples", len(df))
+        mlflow_module.log_param("threshold", threshold)
+        mlflow_module.log_param("margin", margin)
+        mlflow_module.log_param(
+            "classifier", "classification_v2_mix_v5.keywords_and_llm"
+        )
+        mlflow_module.log_param("prompt_name", prompt_name)
         mlflow_module.log_param("prompt_path", str(prompt_file.resolve()))
-        mlflow_module.log_param("num_samples", len(descriptions))
+
+        # Log prompt file as artifact
         mlflow_module.log_artifact(str(prompt_file.resolve()), artifact_path="prompts")
 
+        output_labels = []
+        wrong_results = {}
         start_time = time.perf_counter()
-        for description, expected in zip(descriptions, categories):
-            prediction = await _classify_description(
-                description=description,
-                mapper=mapper,
-                prompt_file=prompt_file,
+
+        print(f"Starting analysis on {len(df)} rows...")
+
+        for index, row in df.iterrows():
+            print(f"--- Processing Row: {index} ---")
+
+            # Parse contract description
+            clean_desc = _parse_contract_description(row["ContractDescription"])
+
+            # Build the combined text for the classifier
+            # Combine title and description for maximum keyword context
+            contract_text = f"{row['contract_title']} : {clean_desc}"
+
+            # Run classification with system prompt for LLM fallback
+            result, reason = await keywords_and_llm(
+                description=contract_text,
+                threshold=threshold,
+                margin=margin,
+                system_prompt_file_location=prompt_file,
             )
-            predictions.append(prediction)
-            is_correct = prediction == expected
-            correct += int(is_correct)
-            print(
-                f"expected: {expected} | predicted: {prediction} | correct: {is_correct}"
-            )
+
+            # Track wrong results
+            if result != row["Correct Match "]:
+                wrong_results[str(index)] = {
+                    "description": row["ContractDescription"],
+                    "AI_label": result,
+                    "Actual_label": row["Correct Match "],
+                    "reason": reason,
+                }
+
+            output_labels.append(result)
+
+            print(f"AI Prediction: {result}")
+            print(f"Actual Label:  {row['Correct Match ']}")
 
         elapsed_seconds = time.perf_counter() - start_time
-        accuracy = (correct / len(predictions)) * 100 if predictions else 0.0
-        print(
-            f"\n{mapper.upper()} accuracy: {accuracy:.2f}% on {len(predictions)} samples"
-        )
 
-        result_df = df[["Category", "Description"]].copy()
-        result_df["AI classification"] = predictions
-        result_df["correct"] = result_df["Category"] == result_df["AI classification"]
-        result_df.to_csv(output_path, index=False)
-        print(f"Saved results to: {output_path}")
+        # Update the DataFrame with predictions
+        df["AI_CategoryMatchV3"] = output_labels
 
-        mlflow_module.log_metric("accuracy_percent", accuracy)
-        mlflow_module.log_metric("accuracy_fraction", accuracy / 100)
-        mlflow_module.log_metric("correct_predictions", correct)
+        # Accuracy Calculations
+        accuracy_series = df["AI_CategoryMatchV3"] == df["Correct Match "]
+        correct_count = accuracy_series.sum()
+        total_count = len(df)
+        accuracy_pct = (correct_count / total_count) * 100
+
+        # Compare with old model if available
+        old_model_accuracy_pct = None
+        if "AI_CategoryMatch" in df.columns:
+            old_model_correct_df = df[df["AI_CategoryMatch"] == df["Correct Match "]]
+            old_model_correct_count = len(old_model_correct_df)
+            old_model_accuracy_pct = (old_model_correct_count / total_count) * 100
+            print(f"Old model total correct matches: {old_model_correct_count}")
+            print(f"Old model accuracy: {old_model_accuracy_pct:.2f}%")
+            mlflow_module.log_metric(
+                "old_model_accuracy_percent", old_model_accuracy_pct
+            )
+            mlflow_module.log_metric(
+                "old_model_correct_predictions", old_model_correct_count
+            )
+
+        print("--- Test Results ---")
+        print(f"Total Analyzed: {total_count}")
+        print(f"Correct Matches: {correct_count}")
+        print(f"Accuracy: {accuracy_pct:.2f}%")
+        print(f"Wrong predictions: {len(wrong_results)}")
+
+        # Save results
+        df.to_excel(output_path, index=False)
+        print(f"Results saved to {output_path}")
+
+        # Log metrics to MLflow
+        mlflow_module.log_metric("accuracy_percent", accuracy_pct)
+        mlflow_module.log_metric("accuracy_fraction", accuracy_pct / 100)
+        mlflow_module.log_metric("correct_predictions", correct_count)
+        mlflow_module.log_metric("wrong_predictions", len(wrong_results))
         mlflow_module.log_metric("evaluation_duration_seconds", elapsed_seconds)
+
+        # Log artifacts
         mlflow_module.log_artifact(str(output_path.resolve()), artifact_path="results")
+
+        # Log wrong results as JSON if any
+        if wrong_results:
+            import json
+
+            wrong_results_path = (
+                output_path.parent / f"{output_path.stem}_wrong_results.json"
+            )
+            with open(wrong_results_path, "w") as f:
+                json.dump(wrong_results, f, indent=2)
+            mlflow_module.log_artifact(
+                str(wrong_results_path.resolve()), artifact_path="results"
+            )
+            print(f"Wrong results saved to {wrong_results_path}")
 
 
 def _build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Run contract mapping evaluation with selectable mapper and prompt."
+        description="Run contract mapping evaluation with keywords_and_llm classifier and MLflow tracking."
     )
     parser.add_argument(
-        "--truth-set",
+        "--input",
         type=Path,
-        default=DEFAULT_TRUTH_SET,
-        help="Path to truth set CSV file (must have Description and Category columns).",
-    )
-    parser.add_argument(
-        "--mapper",
-        choices=["v1", "v2"],
-        required=True,
-        help="Mapper version to run.",
-    )
-    parser.add_argument(
-        "--prompt",
-        type=str,
-        default=None,
-        help="Prompt file name from prompts/ (example: system_prompt_v2.md).",
+        default=DEFAULT_INPUT_FILE,
+        help="Path to input Excel file with columns: Correct Match , ContractDescription, contract_title.",
     )
     parser.add_argument(
         "--output",
         type=Path,
         default=None,
-        help="Optional output CSV path. Defaults to data/results/eval_<mapper>_<prompt>.csv.",
+        help="Optional output Excel path. Defaults to data/results/eval_keywords_llm_t{threshold}_m{margin}.xlsx.",
+    )
+    parser.add_argument(
+        "--threshold",
+        type=int,
+        default=10,
+        help="Keyword threshold parameter for classification (default: 10).",
+    )
+    parser.add_argument(
+        "--margin",
+        type=int,
+        default=0,
+        help="Margin parameter for classification (default: 0).",
+    )
+    parser.add_argument(
+        "--prompt",
+        type=str,
+        default=DEFAULT_SYSTEM_PROMPT,
+        help=f"System prompt file name from prompts/ for LLM fallback (default: {DEFAULT_SYSTEM_PROMPT}).",
     )
     parser.add_argument(
         "--list-prompts",
@@ -217,7 +337,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--mlflow-experiment-name",
         type=str,
         default=None,
-        help="Optional Azure MLflow experiment name. Defaults to MLFLOW_EXPERIMENT_NAME or ContractMap-Evaluation.",
+        help="Optional Azure MLflow experiment name. Defaults to MLFLOW_EXPERIMENT_NAME or ContractMap-KeywordLLM-Evaluation.",
     )
     parser.add_argument(
         "--mlflow-run-name",
@@ -239,11 +359,12 @@ def main() -> None:
         return
 
     asyncio.run(
-        run_evaluation(
-            truth_set_path=args.truth_set,
-            mapper=args.mapper,
-            prompt_name=args.prompt,
+        run_classification_test(
+            input_path=args.input,
             output_path=args.output,
+            threshold=args.threshold,
+            margin=args.margin,
+            prompt_name=args.prompt,
             mlflow_tracking_uri=args.mlflow_tracking_uri,
             mlflow_experiment_name=args.mlflow_experiment_name,
             mlflow_run_name=args.mlflow_run_name,
