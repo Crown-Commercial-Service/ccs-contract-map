@@ -44,12 +44,12 @@ class FakeMLflow:
         self.artifacts.append((path, artifact_path))
 
 
-def test_load_truth_set_raises_when_required_columns_missing(tmp_path):
+def test_load_and_normalize_data_raises_when_required_columns_missing(tmp_path):
     truth_set = tmp_path / "truth.csv"
     pd.DataFrame({"Description": ["desc only"]}).to_csv(truth_set, index=False)
 
     with pytest.raises(ValueError, match="Truth set must include columns"):
-        run_evaluation._load_truth_set(truth_set)
+        run_evaluation._load_and_normalize_data(truth_set)
 
 
 def test_resolve_prompt_file_uses_mapper_default(monkeypatch, tmp_path):

@@ -53,50 +53,19 @@ def _get_mlflow_module() -> Any | None:
         return None
 
 
-def _load_and_normalize_data(input_path: Path) -> pd.DataFrame:
-    """Load data from Excel and apply normalization rules."""
-    if not input_path.exists():
-        raise FileNotFoundError(f"Input file not found: {input_path}")
+def _load_truth_set(truth_set_path: Path) -> pd.DataFrame:
+    if not truth_set_path.exists():
+        raise FileNotFoundError(f"Truth set file not found: {truth_set_path}")
 
-    # Load data from Excel
-    data = pd.read_excel(input_path)
-
-    # Validate required columns
-    required_cols = {"Correct Match ", "ContractDescription", "contract_title"}
-    missing = required_cols.difference(data.columns)
+    df = pd.read_csv(truth_set_path)
+    required_cols = {"Description", "Category"}
+    missing = required_cols.difference(df.columns)
     if missing:
         raise ValueError(
-            f"Input file must include columns {sorted(required_cols)}. Missing: {sorted(missing)}"
+            f"Truth set must include columns {sorted(required_cols)}. Missing: {sorted(missing)}"
         )
 
-    # 1. Clean the 'Correct Match ' column
-    # This converts '&' to 'and' and removes extra trailing spaces
-    data["Correct Match "] = (
-        data["Correct Match "]
-        .astype(str)
-        .str.replace(r"\s*&\s*", " and ", regex=True)
-        .str.replace(r"\s+", " ", regex=True)  # Remove double spaces
-        .str.strip()
-    )
-
-    # 2. Fix specific singular/plural or inconsistent names
-    # Based on failure list, standardize these specific strings
-    normalization_map = {
-        "Network Service": "Network Services",
-        "Cloud & Hosting": "Cloud and Hosting",
-        "HR & Workforce Services": "HR and Workforce Services",
-        "Digital & Technology Services": "Digital and Technology Services",
-    }
-
-    data["Correct Match "] = data["Correct Match "].replace(normalization_map)
-
-    # Normalize AI_CategoryMatch if it exists
-    if "AI_CategoryMatch" in data.columns:
-        data["AI_CategoryMatch"] = data["AI_CategoryMatch"].replace(normalization_map)
-
-    return data.dropna(subset=["Correct Match ", "ContractDescription"]).reset_index(
-        drop=True
-    )
+    return df.dropna(subset=["Description", "Category"]).reset_index(drop=True)
 
 
 def _parse_contract_description(description_raw: Any) -> str:
@@ -151,7 +120,7 @@ async def run_classification_test(
     from core.classification_v2_mix_v5 import keywords_and_llm
 
     # Load and normalize data
-    df = _load_and_normalize_data(input_path=input_path)
+    df = _load_truth_set(truth_set_path=input_path)
 
     # Set default output path
     if output_path is None:
