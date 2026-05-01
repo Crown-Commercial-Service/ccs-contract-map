@@ -115,27 +115,37 @@ def test_run_evaluation_logs_mlflow_params_metrics_and_artifacts(monkeypatch, tm
     prompt_file.write_text("prompt")
     pd.DataFrame(
         {
+            "Title": ["title-a", "title-b"],
             "Description": ["desc-a", "desc-b"],
             "Category": ["cat-a", "cat-b"],
         }
     ).to_csv(truth_set, index=False)
 
-    async def fake_classify(description: str, mapper: str, prompt_file: Path) -> str:
-        mapping = {"desc-a": "cat-a", "desc-b": "wrong-cat"}
+    async def fake_keywords_and_llm(
+        description: str, threshold: int, margin: int, system_prompt_file_location: Path
+    ) -> tuple[str, str]:
+        mapping = {
+            "title-a : desc-a": ("cat-a", "matched"),
+            "title-b : desc-b": ("wrong-cat", "mismatched"),
+        }
         return mapping[description]
 
     fake_mlflow = FakeMLflow()
+    monkeypatch.setattr(run_evaluation, "REPO_ROOT", tmp_path)
     monkeypatch.setattr(
         run_evaluation, "_resolve_prompt_file", lambda *args, **kwargs: prompt_file
     )
-    monkeypatch.setattr(run_evaluation, "_classify_description", fake_classify)
+    monkeypatch.setattr(
+        "core.classification_v2_mix_v5.keywords_and_llm", fake_keywords_and_llm
+    )
     monkeypatch.setattr(run_evaluation, "_get_mlflow_module", lambda: fake_mlflow)
 
     asyncio.run(
-        run_evaluation.run_evaluation(
-            truth_set_path=truth_set,
-            mapper="v2",
-            prompt_name=None,
+        run_evaluation.evaluate_truthset(
+            truthset_path=truth_set,
+            threshold=10,
+            margin=0,
+            prompt_name="custom_prompt.md",
             output_path=output_path,
             mlflow_tracking_uri="http://mlflow.local:5000",
             mlflow_experiment_name="ContractMap-Evaluation-Test",
@@ -147,8 +157,6 @@ def test_run_evaluation_logs_mlflow_params_metrics_and_artifacts(monkeypatch, tm
     assert fake_mlflow.experiment_name == "ContractMap-Evaluation-Test"
     assert fake_mlflow.start_run_name == "unit-test-run"
 
-    assert fake_mlflow.params["mapper"] == "v2"
-    assert fake_mlflow.params["truth_set_path"] == str(truth_set.resolve())
     assert fake_mlflow.params["prompt_name"] == "custom_prompt.md"
     assert fake_mlflow.params["prompt_path"] == str(prompt_file.resolve())
     assert fake_mlflow.params["num_samples"] == 2
