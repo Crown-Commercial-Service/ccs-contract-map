@@ -1,11 +1,13 @@
-from src.core.classification_v2 import contract_mapper_v2
-from src.core.classification_v5 import HeuristicClassifier
+from core.classification_v2 import contract_mapper_v2
+from core.classification_v5 import HeuristicClassifier
 
 
 GLOBAL_CLASSIFIER = HeuristicClassifier()
 
 
-async def keywords_and_llm(description: str, threshold: int, margin: int):
+async def keywords_and_llm(
+    description: str, threshold: int, margin: int, system_prompt_file_location=None
+):
     result, score = GLOBAL_CLASSIFIER.classify(
         description, threshold=threshold, margin=margin
     )
@@ -20,6 +22,8 @@ async def keywords_and_llm(description: str, threshold: int, margin: int):
     # This only happens if result is None (Low score or Ambiguous due to margin being too close)
     print(f"❌ Confidence too low (Score: {score}). Falling back to LLM...")
 
-    result_llm = await contract_mapper_v2(description)
+    result_llm = await contract_mapper_v2(
+        description, system_prompt_file_location=system_prompt_file_location
+    )
 
     return result_llm, "LLM used"

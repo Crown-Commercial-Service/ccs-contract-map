@@ -2,7 +2,7 @@ from langchain_openai import AzureChatOpenAI
 from dotenv import load_dotenv
 import os
 from pathlib import Path
-from src.utils.file_to_string import file_to_string_processor
+from utils.file_to_string import file_to_string_processor
 from functools import lru_cache
 
 load_dotenv()

@@ -1,4 +1,4 @@
-from src.core.classification_v1 import contract_mapper
+from core.classification_v1 import contract_mapper
 from fastapi import FastAPI
 from pydantic import BaseModel
 from pathlib import Path
