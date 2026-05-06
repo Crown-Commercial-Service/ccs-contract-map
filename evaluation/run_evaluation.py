@@ -56,8 +56,16 @@ def _get_mlflow_module() -> Any | None:
 def _load_truthset(truthset_path: Path) -> pd.DataFrame:
     if not truthset_path.exists():
         raise FileNotFoundError(f"Truth set file not found: {truthset_path}")
-
-    df = pd.read_csv(truthset_path)
+    file_suffix = truthset_path.suffix.lower()
+    if file_suffix == ".csv":
+        df = pd.read_csv(truthset_path)
+    elif file_suffix in [".xlsx", ".xls"]:
+        df = pd.read_excel(truthset_path)
+    else:
+        raise ValueError(
+            f"Unsupported file format: {file_suffix}. "
+            f"Supported formats: .csv, .xlsx, .xls"
+        )
     required_cols = {"Description", "Category"}
     missing = required_cols.difference(df.columns)
     if missing:
@@ -207,21 +215,6 @@ async def evaluate_truthset(
         total_count = len(df)
         accuracy_pct = (correct_count / total_count) * 100
 
-        # Compare with old model if available
-        old_model_accuracy_pct = None
-        if "AI_CategoryMatch" in df.columns:
-            old_model_correct_df = df[df["AI_CategoryMatch"] == df["Category"]]
-            old_model_correct_count = len(old_model_correct_df)
-            old_model_accuracy_pct = (old_model_correct_count / total_count) * 100
-            print(f"Old model total correct matches: {old_model_correct_count}")
-            print(f"Old model accuracy: {old_model_accuracy_pct:.2f}%")
-            mlflow_module.log_metric(
-                "old_model_accuracy_percent", old_model_accuracy_pct
-            )
-            mlflow_module.log_metric(
-                "old_model_correct_predictions", old_model_correct_count
-            )
-
         print("--- Test Results ---")
         print(f"Total Analyzed: {total_count}")
         print(f"Correct Matches: {correct_count}")
@@ -234,7 +227,6 @@ async def evaluate_truthset(
 
         # Log metrics to MLflow
         mlflow_module.log_metric("accuracy_percent", accuracy_pct)
-        mlflow_module.log_metric("accuracy_fraction", accuracy_pct / 100)
         mlflow_module.log_metric("correct_predictions", correct_count)
         mlflow_module.log_metric("wrong_predictions", len(wrong_results))
         mlflow_module.log_metric("evaluation_duration_seconds", elapsed_seconds)
