@@ -1,7 +1,7 @@
 import pandas as pd
 from pathlib import Path
 import ast
-from utils.llm_keywords_finder import keywords_finder_llm
+from src.utils.llm_keywords_finder import keywords_finder_llm
 import json
 
 # --- CONFIGURATION ---

@@ -1,5 +1,5 @@
-from core.classification_v2 import contract_mapper_v2
-from core.classification_v5 import HeuristicClassifier
+from src.core.classification_v2 import contract_mapper_v2
+from src.core.classification_v5 import HeuristicClassifier
 
 
 GLOBAL_CLASSIFIER = HeuristicClassifier()

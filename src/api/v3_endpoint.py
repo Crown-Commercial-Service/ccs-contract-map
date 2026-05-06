@@ -1,4 +1,4 @@
-from core.classification_v2_mix_v5 import keywords_and_llm
+from src.core.classification_v2_mix_v5 import keywords_and_llm
 from fastapi import FastAPI
 from pydantic import BaseModel
 
