@@ -66,14 +66,21 @@ def _load_truthset(truthset_path: Path) -> pd.DataFrame:
             f"Unsupported file format: {file_suffix}. "
             f"Supported formats: .csv, .xlsx, .xls"
         )
-    required_cols = {"Description", "Category"}
+    required_cols = {"Description", "Category", "Title"}
     missing = required_cols.difference(df.columns)
     if missing:
         raise ValueError(
             f"Truth set must include columns {sorted(required_cols)}. Missing: {sorted(missing)}"
         )
 
-    return df.dropna(subset=["Description", "Category"]).reset_index(drop=True)
+    # Keep only necessary columns and drop rows with missing values
+    df = (
+        df[list(required_cols)]
+        .dropna(subset=["Description", "Category"])
+        .reset_index(drop=True)
+    )
+
+    return df
 
 
 def _parse_contract_description(description_raw: Any) -> str:
@@ -106,7 +113,7 @@ async def evaluate_truthset(
 
     Args:
         truthset_path: Path to input Excel file
-        output_path: Path to save output results (Excel)
+        output_path: Path to save output results (CSV)
         threshold: Keyword threshold for classification_v2_mix_v5
         margin: Margin parameter for classification_v2_mix_v5
         prompt_name: System prompt file name for LLM fallback
@@ -133,7 +140,7 @@ async def evaluate_truthset(
     # Set default output path
     if output_path is None:
         output_path = (
-            REPO_ROOT / f"data/results/eval_keywords_llm_t{threshold}_m{margin}.xlsx"
+            REPO_ROOT / f"data/results/eval_keywords_llm_t{threshold}_m{margin}.csv"
         )
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -226,7 +233,7 @@ async def evaluate_truthset(
         print(f"Wrong predictions: {len(wrong_results)}")
 
         # Save results
-        df.to_excel(output_path, index=False)
+        df.to_csv(output_path, index=False)
         print(f"Results saved to {output_path}")
 
         # Log metrics to MLflow
@@ -267,7 +274,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--output",
         type=Path,
         default=None,
-        help="Optional output Excel path. Defaults to data/results/eval_keywords_llm_t{threshold}_m{margin}.xlsx.",
+        help="Optional output CSV path. Defaults to data/results/eval_keywords_llm_t{threshold}_m{margin}.csv.",
     )
     parser.add_argument(
         "--threshold",
