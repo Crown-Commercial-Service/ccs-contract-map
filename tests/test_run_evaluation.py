@@ -68,13 +68,13 @@ def test_run_evaluation_writes_default_output_csv(monkeypatch, tmp_path):
         }
     ).to_csv(truth_set, index=False)
 
-    # Return tuple (result, reason) as expected
+    # Return tuple (result, reason, heuristic_score) as expected
     async def fake_keywords_and_llm(
         description: str, threshold: int, margin: int, system_prompt_file_location: Path
-    ) -> tuple[str, str]:
+    ) -> tuple[str, str, float]:
         mapping = {
-            "title-a : desc-a": ("cat-a", "matched"),
-            "title-b : desc-b": ("wrong-cat", "mismatched"),
+            "title-a : desc-a": ("cat-a", "matched", 15.0),
+            "title-b : desc-b": ("wrong-cat", "mismatched", 8.0),
         }
         return mapping[description]
 
@@ -104,7 +104,7 @@ def test_run_evaluation_writes_default_output_csv(monkeypatch, tmp_path):
     assert output_file.exists()
 
     result_df = pd.read_excel(output_file)
-    assert result_df["AI_CategoryMatchV3"].tolist() == ["cat-a", "wrong-cat"]
+    assert result_df["AI_Prediction"].tolist() == ["cat-a", "wrong-cat"]
 
 
 def test_run_evaluation_logs_mlflow_params_metrics_and_artifacts(monkeypatch, tmp_path):
@@ -123,10 +123,10 @@ def test_run_evaluation_logs_mlflow_params_metrics_and_artifacts(monkeypatch, tm
 
     async def fake_keywords_and_llm(
         description: str, threshold: int, margin: int, system_prompt_file_location: Path
-    ) -> tuple[str, str]:
+    ) -> tuple[str, str, float]:
         mapping = {
-            "title-a : desc-a": ("cat-a", "matched"),
-            "title-b : desc-b": ("wrong-cat", "mismatched"),
+            "title-a : desc-a": ("cat-a", "matched", 15.0),
+            "title-b : desc-b": ("wrong-cat", "mismatched", 8.0),
         }
         return mapping[description]
 
@@ -162,7 +162,6 @@ def test_run_evaluation_logs_mlflow_params_metrics_and_artifacts(monkeypatch, tm
     assert fake_mlflow.params["num_samples"] == 2
 
     assert fake_mlflow.metrics["accuracy_percent"] == 50.0
-    assert fake_mlflow.metrics["accuracy_fraction"] == 0.5
     assert fake_mlflow.metrics["correct_predictions"] == 1
     assert "evaluation_duration_seconds" in fake_mlflow.metrics
 

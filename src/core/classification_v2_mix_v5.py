@@ -16,7 +16,7 @@ async def keywords_and_llm(
     # If 'result' is None, it means the score was too low OR it was a 'Tie'
     if result:
         print(f"✅ Keywords chosen. Heuristic score: {score}")
-        return result, f"Heuristic Match (Score: {score})"
+        return result, f"Heuristic Match (Score: {score})", score
 
     # 3. Fallback to the Asynchronous LLM
     # This only happens if result is None (Low score or Ambiguous due to margin being too close)
@@ -26,4 +26,4 @@ async def keywords_and_llm(
         description, system_prompt_file_location=system_prompt_file_location
     )
 
-    return result_llm, "LLM used"
+    return result_llm, "LLM used", score

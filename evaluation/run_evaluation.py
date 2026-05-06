@@ -167,6 +167,7 @@ async def evaluate_truthset(
         mlflow_module.log_artifact(str(prompt_file.resolve()), artifact_path="prompts")
 
         output_labels = []
+        heuristic_scores = []
         wrong_results = {}
         start_time = time.perf_counter()
 
@@ -183,7 +184,7 @@ async def evaluate_truthset(
             contract_text = f"{row['Title']} : {clean_desc}"
 
             # Run classification with system prompt for LLM fallback
-            result, reason = await keywords_and_llm(
+            result, reason, heuristic_score = await keywords_and_llm(
                 description=contract_text,
                 threshold=threshold,
                 margin=margin,
@@ -197,9 +198,11 @@ async def evaluate_truthset(
                     "AI_label": result,
                     "Actual_label": row["Category"],
                     "reason": reason,
+                    "heuristic_score": heuristic_score,
                 }
 
             output_labels.append(result)
+            heuristic_scores.append(heuristic_score)
 
             print(f"AI Prediction: {result}")
             print(f"Actual Label:  {row['Category']}")
@@ -207,10 +210,11 @@ async def evaluate_truthset(
         elapsed_seconds = time.perf_counter() - start_time
 
         # Update the DataFrame with predictions
-        df["AI_CategoryMatchV3"] = output_labels
+        df["AI_Prediction"] = output_labels
+        df["Heuristic_Score"] = heuristic_scores
 
         # Accuracy Calculations
-        accuracy_series = df["AI_CategoryMatchV3"] == df["Category"]
+        accuracy_series = df["AI_Prediction"] == df["Category"]
         correct_count = accuracy_series.sum()
         total_count = len(df)
         accuracy_pct = (correct_count / total_count) * 100

@@ -36,6 +36,7 @@ async def run_classification_test(df):
     Async loop to process each row through the Hybrid Classifier.
     """
     output_labels = []
+    heuristic_scores = []
     wrong_results = {}
 
     print(f"Starting analysis on {len(df)} rows...")
@@ -61,7 +62,7 @@ async def run_classification_test(df):
         # Combine title and description for maximum keyword context
         contract_text = f"{row['contract_title']} : {clean_desc}"
 
-        result, reason = await keywords_and_llm(
+        result, reason, heuristic_score = await keywords_and_llm(
             description=contract_text, threshold=10, margin=0
         )
 
@@ -70,15 +71,18 @@ async def run_classification_test(df):
                 "description": row["ContractDescription"],
                 "AI_label": result,
                 "Actual_label": row["Correct Match "],
+                "heuristic_score": heuristic_score,
             }
 
         output_labels.append(result)
+        heuristic_scores.append(heuristic_score)
 
         print(f"AI Prediction: {result}")
         print(f"Actual Label:  {row['Correct Match ']}")
 
     # Update the DataFrame and save
     df["AI_CategoryMatchV3"] = output_labels
+    df["Heuristic_Score"] = heuristic_scores
 
     # Accuracy Calculations
     accuracy_series = df["AI_CategoryMatchV3"] == df["Correct Match "]
