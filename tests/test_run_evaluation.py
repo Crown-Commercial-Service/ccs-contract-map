@@ -99,11 +99,11 @@ def test_run_evaluation_writes_default_output_csv(monkeypatch, tmp_path):
         )
     )
 
-    # Expect Excel output with correct naming pattern
-    output_file = repo_root / "data/results/eval_keywords_llm_t10_m0.xlsx"
+    # Expect CSV output with correct naming pattern
+    output_file = repo_root / "data/results/eval_keywords_llm_t10_m0.csv"
     assert output_file.exists()
 
-    result_df = pd.read_excel(output_file)
+    result_df = pd.read_csv(output_file)
     assert result_df["AI_Prediction"].tolist() == ["cat-a", "wrong-cat"]
 
 
