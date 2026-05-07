@@ -13,6 +13,7 @@ pydantic-ai-slim[openai,google,groq]==1.59.0
 python-dotenv
 pandas
 openpyxl
+matplotlib
 
 # API & Server
 fastapi
