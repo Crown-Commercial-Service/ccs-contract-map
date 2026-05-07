@@ -6,14 +6,14 @@
 set -e  # Exit on error
 
 # Define parameter ranges
-# THRESHOLDS=(5 10 15 20 25)
-# MARGINS=(0 1 2 3 4)
-THRESHOLDS=(5 10)
-MARGINS=(0 1)
+# THRESHOLDS=(0 5 10 15 20 25 30 35 40 50 60 70 80 90 100)
+# MARGINS=(1 3 5 10)
+THRESHOLDS=(0 5)
+MARGINS=(1 5)
 
 # Get the repository root (two levels up from src/utils)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 EVALUATION_SCRIPT="$REPO_ROOT/evaluation/run_evaluation.py"
 TRUTHSET_PATH="$REPO_ROOT/new_AI_results_for_Jasmine.xlsx"
 
