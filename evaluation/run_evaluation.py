@@ -152,7 +152,7 @@ async def evaluate_truthset(
             "Set --mlflow-tracking-uri or MLFLOW_TRACKING_URI."
         )
     experiment_name = mlflow_experiment_name or os.getenv(
-        "MLFLOW_EXPERIMENT_NAME", "ContractMap-KeywordLLM-Evaluation"
+        "MLFLOW_EXPERIMENT_NAME", "ContractMap-Evaluation"
     )
     mlflow_module.set_tracking_uri(tracking_uri)
     mlflow_module.set_experiment(experiment_name)

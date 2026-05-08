@@ -211,9 +211,87 @@ def plot_optimization_surface(
         plt.show()
 
 
+def plot_scatterplot(
+    df: pd.DataFrame,
+    output_path: Path | None = None,
+    show_plot: bool = True,
+) -> None:
+    """
+    Generate a scatterplot of the optimization results.
+
+    Args:
+        df: DataFrame with columns threshold, margin, accuracy_percent
+        output_path: Optional path to save the plot
+        show_plot: Whether to display the plot interactively
+    """
+    # Create figure
+    fig, ax = plt.subplots(figsize=(10, 8))
+
+    # Create scatter plot with accuracy as color
+    scatter = ax.scatter(
+        df["threshold"],
+        df["margin"],
+        c=df["accuracy_percent"],
+        cmap="viridis",
+        s=200,
+        alpha=0.8,
+        edgecolors="black",
+        linewidth=1.5,
+    )
+
+    # Add colorbar
+    cbar = plt.colorbar(scatter, ax=ax, label="Accuracy (%)")
+    cbar.ax.tick_params(labelsize=10)
+
+    # Find and annotate best result
+    best_idx = df["accuracy_percent"].idxmax()
+    best_row = df.loc[best_idx]
+    ax.annotate(
+        f'Best: {best_row["accuracy_percent"]:.2f}%\n(t={best_row["threshold"]:.0f}, m={best_row["margin"]:.0f})',
+        xy=(best_row["threshold"], best_row["margin"]),
+        xytext=(10, 10),
+        textcoords="offset points",
+        fontsize=11,
+        weight="bold",
+        bbox=dict(
+            boxstyle="round,pad=0.5", facecolor="yellow", alpha=0.7, edgecolor="black"
+        ),
+        arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0", lw=2),
+    )
+
+    # Set labels and title
+    ax.set_xlabel("Threshold", fontsize=14, weight="bold")
+    ax.set_ylabel("Margin", fontsize=14, weight="bold")
+    ax.set_title(
+        "Contract Classification Optimization Results\n(Threshold vs Margin, colored by Accuracy)",
+        fontsize=16,
+        weight="bold",
+        pad=20,
+    )
+
+    # Add grid for readability
+    ax.grid(True, alpha=0.3, linestyle="--")
+    ax.set_axisbelow(True)
+
+    # Adjust tick label sizes
+    ax.tick_params(axis="both", labelsize=11)
+
+    plt.tight_layout()
+
+    # Save if output path provided
+    if output_path:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(output_path, dpi=300, bbox_inches="tight")
+        print(f"\nPlot saved to {output_path}")
+
+    # Show plot if requested
+    if show_plot:
+        plt.show()
+
+
 def _build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Visualize MLflow experiment results as a 3D optimization surface."
+        description="Visualize MLflow experiment results as optimization plots."
     )
     parser.add_argument(
         "--mlflow-tracking-uri",
@@ -226,6 +304,13 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         type=str,
         default="ContractMap-KeywordLLM-Evaluation",
         help="Azure MLflow experiment name (default: ContractMap-KeywordLLM-Evaluation).",
+    )
+    parser.add_argument(
+        "--plot-type",
+        type=str,
+        choices=["surface", "scatterplot"],
+        default="surface",
+        help="Type of plot to generate: 'surface' for 3D surface plot, 'scatterplot' for 2D scatterplot (default: surface).",
     )
     parser.add_argument(
         "--output",
@@ -251,12 +336,19 @@ def main() -> None:
         mlflow_experiment_name=args.mlflow_experiment_name,
     )
 
-    # Generate plot
-    plot_optimization_surface(
-        df=df,
-        output_path=args.output,
-        show_plot=not args.no_show,
-    )
+    # Generate plot based on selected type
+    if args.plot_type == "surface":
+        plot_optimization_surface(
+            df=df,
+            output_path=args.output,
+            show_plot=not args.no_show,
+        )
+    elif args.plot_type == "scatterplot":
+        plot_scatterplot(
+            df=df,
+            output_path=args.output,
+            show_plot=not args.no_show,
+        )
 
     # Print summary statistics
     print("\n--- Summary Statistics ---")

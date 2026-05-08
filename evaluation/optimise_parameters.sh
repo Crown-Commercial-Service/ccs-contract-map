@@ -6,10 +6,8 @@
 set -e  # Exit on error
 
 # Define parameter ranges
-# THRESHOLDS=(0 5 10 15 20 25 30 35 40 50 60 70 80 90 100)
-# MARGINS=(1 3 5 10)
-THRESHOLDS=(0 5)
-MARGINS=(1 5)
+THRESHOLDS=(1 2 3 5 10 25 50)
+MARGINS=(1 5 10)
 
 # Get the repository root (two levels up from src/utils)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
