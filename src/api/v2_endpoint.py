@@ -10,7 +10,7 @@ class ContractDescription(BaseModel):
     description: str
 
 
-@app.post("/map")
+@app.post("/v1/map")
 async def run_contract_mapper(body: ContractDescription):
     try:
         response = await contract_mapper_v2(user_contract_description=body.description)
