@@ -5,7 +5,6 @@ from pydantic import BaseModel
 
 # Redis & Identity Imports
 from redis.asyncio import Redis
-from azure.identity import DefaultAzureCredential
 from redis_entraid.cred_provider import create_from_default_azure_credential
 
 # Cache Imports
@@ -32,15 +31,17 @@ async def lifespan(app: FastAPI):
                 host=redis_host,
                 port=6380,
                 ssl=True,
-                credential_provider=cred_provider,# Mandatory for Entra ID: connection must be established to verify token
-                socket_timeout=5
+                credential_provider=cred_provider,  # Mandatory for Entra ID: connection must be established to verify token
+                socket_timeout=5,
             )
 
             # Test connection immediately to ensure Entra ID/Network is valid
             await redis_client.ping()
 
-            FastAPICache.init(RedisBackend(redis_client), prefix="ccs-mapper-cache")#the prefix creates a folder to store the specific cache
-            print(f"✅ Redis Cache initialized")
+            FastAPICache.init(
+                RedisBackend(redis_client), prefix="ccs-mapper-cache"
+            )  # the prefix creates a folder to store the specific cache
+            print("✅ Redis Cache initialized")
         except Exception as e:
             print(f"⚠️ Redis connection failed: {e}. Falling back to InMemory cache.")
             FastAPICache.init(InMemoryBackend(), prefix="ccs-mapper-cache")
