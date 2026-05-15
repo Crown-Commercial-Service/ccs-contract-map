@@ -59,12 +59,14 @@ def _load_truthset(truthset_path: Path) -> pd.DataFrame:
     file_suffix = truthset_path.suffix.lower()
     if file_suffix == ".csv":
         df = pd.read_csv(truthset_path)
+    elif file_suffix == ".tsv":
+        df = pd.read_csv(truthset_path, sep="\t")
     elif file_suffix in [".xlsx", ".xls"]:
         df = pd.read_excel(truthset_path)
     else:
         raise ValueError(
             f"Unsupported file format: {file_suffix}. "
-            f"Supported formats: .csv, .xlsx, .xls"
+            f"Supported formats: .csv, .tsv, .xlsx, .xls"
         )
     required_cols = {"Description", "Category", "Title"}
     missing = required_cols.difference(df.columns)
