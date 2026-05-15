@@ -132,7 +132,7 @@ async def evaluate_truthset(
     prompt_file = _resolve_prompt_file(prompt_name)
 
     # Import classification function
-    from core.classification_v2_mix_v5 import keywords_and_llm
+    from src.core.classification_v2_mix_v5 import keywords_and_llm
 
     # Load and normalize data
     df = _load_truthset(truthset_path=truthset_path)

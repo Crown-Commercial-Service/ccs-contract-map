@@ -84,7 +84,7 @@ def test_run_evaluation_writes_default_output_csv(monkeypatch, tmp_path):
     )
     # Mock the actual classification function
     monkeypatch.setattr(
-        "core.classification_v2_mix_v5.keywords_and_llm", fake_keywords_and_llm
+        "src.core.classification_v2_mix_v5.keywords_and_llm", fake_keywords_and_llm
     )
     monkeypatch.setattr(run_evaluation, "_get_mlflow_module", lambda: FakeMLflow())
 
@@ -136,7 +136,7 @@ def test_run_evaluation_logs_mlflow_params_metrics_and_artifacts(monkeypatch, tm
         run_evaluation, "_resolve_prompt_file", lambda *args, **kwargs: prompt_file
     )
     monkeypatch.setattr(
-        "core.classification_v2_mix_v5.keywords_and_llm", fake_keywords_and_llm
+        "src.core.classification_v2_mix_v5.keywords_and_llm", fake_keywords_and_llm
     )
     monkeypatch.setattr(run_evaluation, "_get_mlflow_module", lambda: fake_mlflow)
 

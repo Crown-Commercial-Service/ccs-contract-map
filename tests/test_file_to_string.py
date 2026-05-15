@@ -1,6 +1,6 @@
 import pytest
 
-from utils.file_to_string import file_to_string_processor
+from src.utils.file_to_string import file_to_string_processor
 
 
 def test_file_to_string_processor_reads_file_content(tmp_path):
