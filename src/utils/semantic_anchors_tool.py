@@ -5,25 +5,14 @@ from src.utils.llm_keywords_finder import keywords_finder_llm
 import json
 
 # --- CONFIGURATION ---
-corpus_location = Path(__file__).parents[2] / "AI Catrgorisation Testing Notes.xlsx"
+corpus_location = Path(__file__).parents[2] / "new_AI_results_for_Jasmine_train.tsv"
 registry_path = (
     Path(__file__).parents[2] / "semantic_anchors2.json"
 )  # doing this not overwrite current version
 
 # --- DATA PREPARATION ---
-data = pd.read_excel(str(corpus_location))
-data_to_analyse = data[data["Correct Match "].notna()].copy()
-
-data_to_analyse["Correct Match "] = (
-    data_to_analyse["Correct Match "]
-    .astype(str)
-    .str.replace(r"\s*&\s*", " and ", regex=True)
-    .str.strip()
-)
-
-data_to_analyse["Correct Match "] = data_to_analyse["Correct Match "].replace(
-    {"Network Service": "Network Services"}
-)
+data = pd.read_csv(str(corpus_location), sep="\t")
+data_to_analyse = data[data["Category"].notna()].copy()
 
 
 def extract_description(val):
@@ -34,12 +23,12 @@ def extract_description(val):
         return ""
 
 
-data_to_analyse["clean_description"] = data_to_analyse["ContractDescription"].apply(
+data_to_analyse["clean_description"] = data_to_analyse["Description"].apply(
     extract_description
 )
 
 # --- KEYWORD EXTRACTION LOOP ---
-grouped_data = data_to_analyse.groupby("Correct Match ")
+grouped_data = data_to_analyse.groupby("Category")
 registry = {}
 
 for category, group in grouped_data:
