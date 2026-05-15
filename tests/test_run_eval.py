@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-import evaluation.run_evaluation as run_evaluation
+import eval.run_eval as run_eval
 
 
 class _DummyRunContext:
@@ -49,10 +49,10 @@ def test_load_truthset_raises_when_required_columns_missing(tmp_path):
     pd.DataFrame({"Description": ["desc only"]}).to_csv(truth_set, index=False)
 
     with pytest.raises(ValueError, match="Truth set must include columns"):
-        run_evaluation._load_truthset(truth_set)
+        run_eval._load_truthset(truth_set)
 
 
-def test_run_evaluation_writes_default_output_csv(monkeypatch, tmp_path):
+def test_run_eval_writes_default_output_csv(monkeypatch, tmp_path):
     repo_root = tmp_path
     truth_set = repo_root / "truth.csv"
     prompt_file = repo_root / "prompts" / "custom_prompt.md"
@@ -78,18 +78,18 @@ def test_run_evaluation_writes_default_output_csv(monkeypatch, tmp_path):
         }
         return mapping[description]
 
-    monkeypatch.setattr(run_evaluation, "REPO_ROOT", repo_root)
+    monkeypatch.setattr(run_eval, "REPO_ROOT", repo_root)
     monkeypatch.setattr(
-        run_evaluation, "_resolve_prompt_file", lambda *args, **kwargs: prompt_file
+        run_eval, "_resolve_prompt_file", lambda *args, **kwargs: prompt_file
     )
     # Mock the actual classification function
     monkeypatch.setattr(
         "src.core.classification_v2_mix_v5.keywords_and_llm", fake_keywords_and_llm
     )
-    monkeypatch.setattr(run_evaluation, "_get_mlflow_module", lambda: FakeMLflow())
+    monkeypatch.setattr(run_eval, "_get_mlflow_module", lambda: FakeMLflow())
 
     asyncio.run(
-        run_evaluation.evaluate_truthset(
+        run_eval.evaluate_truthset(
             truthset_path=truth_set,
             threshold=10,
             margin=0,
@@ -107,7 +107,7 @@ def test_run_evaluation_writes_default_output_csv(monkeypatch, tmp_path):
     assert result_df["AI_Prediction"].tolist() == ["cat-a", "wrong-cat"]
 
 
-def test_run_evaluation_logs_mlflow_params_metrics_and_artifacts(monkeypatch, tmp_path):
+def test_run_eval_logs_mlflow_params_metrics_and_artifacts(monkeypatch, tmp_path):
     truth_set = tmp_path / "truth.csv"
     prompt_file = tmp_path / "prompts" / "custom_prompt.md"
     output_path = tmp_path / "results.csv"
@@ -131,17 +131,17 @@ def test_run_evaluation_logs_mlflow_params_metrics_and_artifacts(monkeypatch, tm
         return mapping[description]
 
     fake_mlflow = FakeMLflow()
-    monkeypatch.setattr(run_evaluation, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(run_eval, "REPO_ROOT", tmp_path)
     monkeypatch.setattr(
-        run_evaluation, "_resolve_prompt_file", lambda *args, **kwargs: prompt_file
+        run_eval, "_resolve_prompt_file", lambda *args, **kwargs: prompt_file
     )
     monkeypatch.setattr(
         "src.core.classification_v2_mix_v5.keywords_and_llm", fake_keywords_and_llm
     )
-    monkeypatch.setattr(run_evaluation, "_get_mlflow_module", lambda: fake_mlflow)
+    monkeypatch.setattr(run_eval, "_get_mlflow_module", lambda: fake_mlflow)
 
     asyncio.run(
-        run_evaluation.evaluate_truthset(
+        run_eval.evaluate_truthset(
             truthset_path=truth_set,
             threshold=10,
             margin=0,
