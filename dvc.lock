@@ -1,0 +1,111 @@
+schema: '2.0'
+stages:
+  process_data:
+    cmd: python src/utils/process_truthset.py --input 
+      new_AI_results_for_Jasmine.xlsx --train-ratio 0.8
+    deps:
+    - path: new_AI_results_for_Jasmine.xlsx
+      hash: md5
+      md5: e4470135812be67fcd2a85c2f320a8b7
+      size: 123055
+    - path: src/utils/process_truthset.py
+      hash: md5
+      md5: e83832d861ab598e4a22a1deb9e31f05
+      size: 7120
+    params:
+      params.yaml:
+        data.input_excel: new_AI_results_for_Jasmine.xlsx
+        data.train_split_ratio: 0.8
+    outs:
+    - path: new_AI_results_for_Jasmine_test.tsv
+      hash: md5
+      md5: f7359d7aa59db31e33c94408a5f55da7
+      size: 71068
+    - path: new_AI_results_for_Jasmine_train.tsv
+      hash: md5
+      md5: c5174ac3be2cf59fc71455a26630b335
+      size: 237574
+  extract_keywords:
+    cmd: python src/utils/semantic_anchors_tool.py --input-train-tsv 
+      new_AI_results_for_Jasmine_train.tsv --output-json semantic_anchors2.json
+    deps:
+    - path: new_AI_results_for_Jasmine_train.tsv
+      hash: md5
+      md5: c5174ac3be2cf59fc71455a26630b335
+      size: 237574
+    - path: src/utils/semantic_anchors_tool.py
+      hash: md5
+      md5: da0786e899eb12980ed70fd2bc80b60d
+      size: 6096
+    params:
+      params.yaml:
+        data.semantic_anchors_json: semantic_anchors2.json
+        data.train_tsv: new_AI_results_for_Jasmine_train.tsv
+    outs:
+    - path: semantic_anchors2.json
+      hash: md5
+      md5: fa253f9f6b164158969dae67eec97c87
+      size: 138417
+  optimize_params:
+    cmd: python eval/run_gridsearch.py --params-file params.yaml --truthset 
+      new_AI_results_for_Jasmine.xlsx
+    deps:
+    - path: eval/run_eval.py
+      hash: md5
+      md5: 960621a43d660fcc4cfe63bb3d6d0e95
+      size: 11798
+    - path: eval/run_gridsearch.py
+      hash: md5
+      md5: b762c2240cc5f195fb36718feef01328
+      size: 5812
+    - path: new_AI_results_for_Jasmine_train.tsv
+      hash: md5
+      md5: c5174ac3be2cf59fc71455a26630b335
+      size: 237574
+    - path: semantic_anchors2.json
+      hash: md5
+      md5: fa253f9f6b164158969dae67eec97c87
+      size: 138417
+    params:
+      params.yaml:
+        evaluation.prompt_name: system_prompt_v2.md
+        gridsearch.margins:
+        - 1
+        - 5
+        - 10
+        gridsearch.thresholds:
+        - 1
+        - 2
+        - 3
+        - 5
+        - 10
+        - 25
+        - 50
+        mlflow.experiment_name: ContractMap-Evaluation
+    outs:
+    - path: data/results/optimization_complete.txt
+      hash: md5
+      md5: 05acdff88a65755a93dd665b1e8c69a2
+      size: 86
+  visualize:
+    cmd: python eval/visualise_experiments.py --mlflow-experiment-name 
+      ContractMap-Evaluation --plot-type surface --output 
+      data/results/optimization_surface.png --no-show
+    deps:
+    - path: data/results/optimization_complete.txt
+      hash: md5
+      md5: 05acdff88a65755a93dd665b1e8c69a2
+      size: 86
+    - path: eval/visualise_experiments.py
+      hash: md5
+      md5: cad6809a89e3bb5f8f550928ff929e4f
+      size: 10982
+    params:
+      params.yaml:
+        mlflow.experiment_name: ContractMap-Evaluation
+        outputs.plot_output: data/results/optimization_surface.png
+    outs:
+    - path: data/results/optimization_surface.png
+      hash: md5
+      md5: 8b02dae90c6ac8518ae6dcee55b693a4
+      size: 672224
