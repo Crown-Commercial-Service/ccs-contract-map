@@ -10,7 +10,6 @@ This script applies consistent normalization rules to ground truth data:
 
 import argparse
 from pathlib import Path
-from typing import Optional
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -89,17 +88,15 @@ def split_and_save_datasets(
     return train_path, test_path
 
 
-def clean_and_normalize_data(
-    input_path: Path, train_ratio: Optional[float] = None
-) -> None:
+def clean_and_normalize_data(input_path: Path) -> pd.DataFrame:
     """
     Load data from Excel, apply normalization rules, and overwrite the input file.
-    Optionally split into train/test sets with stratified sampling.
 
     Args:
         input_path: Path to input Excel file (will be overwritten)
-        train_ratio: Optional proportion for train set (0.0-1.0). If provided,
-                    creates {input_stem}_train.tsv and {input_stem}_test.tsv
+
+    Returns:
+        Cleaned DataFrame ready for train/test splitting
     """
     if not input_path.exists():
         raise FileNotFoundError(f"Input file not found: {input_path}")
@@ -165,13 +162,7 @@ def clean_and_normalize_data(
         count = (data["Category"] == cat).sum()
         print(f"  - {cat}: {count} rows")
 
-    # Perform train/test split if requested
-    if train_ratio is not None:
-        try:
-            split_and_save_datasets(data, input_path, train_ratio)
-        except ValueError as e:
-            print(f"\nWarning: Could not create train/test split: {e}")
-            print("Only the cleaned full dataset was saved.")
+    return data
 
 
 def main() -> None:
@@ -187,21 +178,28 @@ def main() -> None:
     parser.add_argument(
         "--train-ratio",
         type=float,
-        default=None,
+        required=True,
         help=(
             "Proportion of data for training set (0.0-1.0). "
-            "If provided, creates stratified train/test TSV files. "
-            "Default: None (no splitting, only cleaned data saved)."
+            "Creates stratified train/test TSV files."
         ),
     )
 
     args = parser.parse_args()
 
-    # Validate train_ratio if provided
-    if args.train_ratio is not None and not 0.0 < args.train_ratio < 1.0:
+    # Validate train_ratio
+    if not 0.0 < args.train_ratio < 1.0:
         parser.error("--train-ratio must be between 0.0 and 1.0 (exclusive)")
 
-    clean_and_normalize_data(args.input, train_ratio=args.train_ratio)
+    # Clean and normalize data
+    cleaned_data = clean_and_normalize_data(args.input)
+
+    # Split into train/test sets
+    try:
+        split_and_save_datasets(cleaned_data, args.input, args.train_ratio)
+    except ValueError as e:
+        print(f"\nError: Could not create train/test split: {e}")
+        raise
 
 
 if __name__ == "__main__":
