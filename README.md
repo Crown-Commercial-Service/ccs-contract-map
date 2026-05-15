@@ -289,3 +289,242 @@ python eval/visualise_experiments.py \
   --plot-type scatterplot \
   --output data/results/prompt_optimization.png
 ```
+
+## DVC Pipeline
+
+This project uses [DVC (Data Version Control)](https://dvc.org/) to orchestrate a reproducible machine learning pipeline for training and evaluating the contract classification model. The pipeline automates data processing, keyword extraction, hyperparameter optimization, and results visualization.
+
+### Pipeline Overview
+
+The pipeline consists of four stages:
+
+1. **process_data**: Cleans and normalizes the truthset data, then splits it into train and test sets
+2. **extract_keywords**: Extracts semantic anchors (keywords) from the training data using LLM
+3. **optimize_params**: Runs a grid search across threshold and margin parameters, logging results to MLflow
+4. **visualize**: Generates visualization plots of the optimization results
+
+### Pipeline Architecture
+
+```
+new_AI_results_for_Jasmine.xlsx
+  ├── [1] process_data
+  │   ├── Output: new_AI_results_for_Jasmine_train.tsv
+  │   └── Output: new_AI_results_for_Jasmine_test.tsv
+  │
+  ├── [2] extract_keywords (depends on train.tsv)
+  │   └── Output: semantic_anchors2.json
+  │
+  └── [3] optimize_params (depends on semantic_anchors2.json, train.tsv)
+      ├── Outputs: data/results/eval_keywords_llm_t*_m*.csv
+      ├── MLflow: Logs 21 runs with threshold, margin, accuracy
+      └── Output: data/results/optimization_complete.txt
+          │
+          └── [4] visualize (depends on completion marker)
+              └── Output: data/results/optimization_surface.png
+```
+
+### Prerequisites
+
+Ensure you have:
+1. DVC installed (included in `requirements.txt`)
+2. Azure MLflow configured (`.env` file with `MLFLOW_TRACKING_URI`)
+3. Authenticated with Azure: `az login`
+
+### Running the Full Pipeline
+
+To execute the entire pipeline from start to finish:
+
+```bash
+# Run all stages
+dvc repro
+
+# View the pipeline dependency graph
+dvc dag
+```
+
+The pipeline will:
+1. Process the input Excel file and create train/test splits
+2. Extract semantic keywords from training data
+3. Run 21 evaluations (7 thresholds × 3 margins) and log to MLflow
+4. Generate a 3D optimization surface plot
+
+**Expected runtime**: 1-2 hours (depends on LLM API response times)
+
+### Running Individual Stages
+
+You can run specific stages independently:
+
+```bash
+# Run only the data processing stage
+dvc repro process_data
+
+# Run up to and including the keyword extraction stage
+dvc repro extract_keywords
+
+# Run only the visualization stage (requires optimization results)
+dvc repro visualize
+```
+
+### Configuration
+
+All pipeline parameters are centralized in `params.yaml`:
+
+```yaml
+# Data Processing
+data:
+  input_excel: "new_AI_results_for_Jasmine.xlsx"
+  train_tsv: "new_AI_results_for_Jasmine_train.tsv"
+  test_tsv: "new_AI_results_for_Jasmine_test.tsv"
+  train_split_ratio: 0.8
+  semantic_anchors_json: "semantic_anchors2.json"
+
+# Grid Search Parameters
+gridsearch:
+  thresholds: [1, 2, 3, 5, 10, 25, 50]
+  margins: [1, 5, 10]
+
+# MLflow Configuration
+mlflow:
+  experiment_name: "ContractMap-Evaluation"
+
+# Evaluation Settings
+evaluation:
+  prompt_name: "system_prompt_v2.md"
+
+# Output Paths
+outputs:
+  results_dir: "data/results"
+  completion_marker: "data/results/optimization_complete.txt"
+  plot_output: "data/results/optimization_surface.png"
+```
+
+**To modify parameters:**
+
+1. Edit `params.yaml` with your desired values
+2. Run `dvc repro` to re-execute affected stages
+
+DVC automatically detects which stages need to re-run based on changed parameters or dependencies.
+
+### Pipeline Outputs
+
+After running the full pipeline, you'll have:
+
+- **Train/Test Data**: 
+  - `new_AI_results_for_Jasmine_train.tsv` (80% of data)
+  - `new_AI_results_for_Jasmine_test.tsv` (20% of data)
+
+- **Semantic Anchors**: 
+  - `semantic_anchors2.json` (keyword registry by category)
+
+- **Evaluation Results**: 
+  - `data/results/eval_keywords_llm_t{threshold}_m{margin}.csv` (21 files)
+  - `data/results/eval_keywords_llm_t{threshold}_m{margin}_wrong_results.json` (21 files)
+
+- **MLflow Runs**: 
+  - 21 runs logged to Azure ML with parameters, metrics, and artifacts
+
+- **Visualization**: 
+  - `data/results/optimization_surface.png` (3D plot of optimization results)
+
+### Checking Pipeline Status
+
+```bash
+# Show pipeline status (which stages need to run)
+dvc status
+
+# Show detailed pipeline information
+dvc status --show-json
+
+# Visualize the pipeline dependency graph (ASCII art)
+dvc dag
+```
+
+### Re-running the Pipeline
+
+DVC uses content-based caching to avoid re-running stages unnecessarily:
+
+```bash
+# Force re-run all stages (ignores cache)
+dvc repro --force
+
+# Re-run from a specific stage onward
+dvc repro --downstream optimize_params
+
+# Re-run a single stage only
+dvc repro --single-item visualize
+```
+
+### Reproducing Results
+
+To reproduce results from a specific commit:
+
+```bash
+# Checkout a specific commit
+git checkout <commit-hash>
+
+# Reproduce the pipeline at that point in history
+dvc repro
+
+# Compare results with current version
+dvc metrics diff
+```
+
+### Manual Execution (Alternative)
+
+If you prefer to run stages manually without DVC:
+
+```bash
+# 1. Process data
+python src/utils/process_truthset.py \
+  --input new_AI_results_for_Jasmine.xlsx \
+  --train-ratio 0.8
+
+# 2. Extract keywords
+python src/utils/semantic_anchors_tool.py \
+  --input-train-tsv new_AI_results_for_Jasmine_train.tsv \
+  --output-json semantic_anchors2.json
+
+# 3. Run grid search
+python eval/run_gridsearch.py \
+  --params-file params.yaml \
+  --truthset new_AI_results_for_Jasmine.xlsx
+
+# 4. Visualize results
+python eval/visualise_experiments.py \
+  --mlflow-experiment-name ContractMap-Evaluation \
+  --plot-type surface \
+  --output data/results/optimization_surface.png \
+  --no-show
+```
+
+### Troubleshooting
+
+**Issue: `dvc: command not found`**
+```bash
+# Use the venv path directly
+/path/to/venv/bin/dvc repro
+```
+
+**Issue: MLflow authentication errors**
+```bash
+# Re-authenticate with Azure
+az login
+
+# Verify your credentials
+az account show
+```
+
+**Issue: Pipeline stages not re-running when expected**
+```bash
+# Check what changed
+dvc status
+
+# Force re-run
+dvc repro --force
+```
+
+**Issue: Out of memory during keyword extraction**
+```bash
+# Process categories in smaller batches by modifying semantic_anchors_tool.py
+# or run the stage with increased memory limits
+```

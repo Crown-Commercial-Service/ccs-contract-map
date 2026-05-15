@@ -2,7 +2,7 @@ import json
 import re
 from pathlib import Path
 
-path = Path(__file__).parents[2] / "semantic_anchors.json"
+path = Path(__file__).parents[2] / "semantic_anchors2.json"
 
 
 class HeuristicClassifier:

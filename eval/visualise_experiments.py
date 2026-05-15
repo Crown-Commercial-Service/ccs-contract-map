@@ -25,7 +25,7 @@ def _get_mlflow_module() -> Any | None:
 
 def fetch_experiment_runs(
     mlflow_tracking_uri: str | None = None,
-    mlflow_experiment_name: str = "ContractMap-KeywordLLM-Evaluation",
+    mlflow_experiment_name: str = "ContractMap-Evaluation",
 ) -> pd.DataFrame:
     """
     Fetch all runs from the specified MLflow experiment.
@@ -302,8 +302,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--mlflow-experiment-name",
         type=str,
-        default="ContractMap-KeywordLLM-Evaluation",
-        help="Azure MLflow experiment name (default: ContractMap-KeywordLLM-Evaluation).",
+        default="ContractMap-Evaluation",
+        help="Azure MLflow experiment name (default: ContractMap-Evaluation).",
     )
     parser.add_argument(
         "--plot-type",

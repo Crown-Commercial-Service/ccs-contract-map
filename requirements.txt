@@ -7,13 +7,28 @@
 aiohappyeyeballs==2.6.1
     # via aiohttp
 aiohttp==3.13.3
-    # via langchain-community
+    # via
+    #   aiohttp-retry
+    #   fsspec
+    #   langchain-community
+aiohttp-retry==2.9.1
+    # via
+    #   dvc-http
+    #   scmrepo
 aiosignal==1.4.0
     # via aiohttp
+amqp==5.3.1
+    # via kombu
 annotated-doc==0.0.4
-    # via fastapi
+    # via
+    #   fastapi
+    #   typer
 annotated-types==0.7.0
     # via pydantic
+antlr4-python3-runtime==4.9.3
+    # via
+    #   hydra-core
+    #   omegaconf
 anyio==4.13.0
     # via
     #   google-genai
@@ -21,13 +36,22 @@ anyio==4.13.0
     #   httpx
     #   openai
     #   starlette
+appdirs==1.4.4
+    # via iterative-telemetry
 asgiref==3.11.1
     # via opentelemetry-instrumentation-asgi
+asyncssh==2.23.0
+    # via scmrepo
+atpublic==7.0.0
+    # via flufl-lock
 attrs==26.1.0
     # via
     #   aiohttp
+    #   dvc
+    #   dvc-data
     #   jsonschema
     #   referencing
+    #   sqltrie
 azure-ai-ml==1.32.0
     # via -r requirements.in
 azure-common==1.1.28
@@ -78,12 +102,18 @@ azureml-mlflow==1.62.0.post1
     # via -r requirements.in
 beautifulsoup4==4.14.3
     # via ccs-web-api
+billiard==4.2.4
+    # via celery
 build==1.4.2
     # via pip-tools
 cachetools==6.2.6
     # via mlflow-skinny
 ccs-web-api @ git+https://github.com/DavisAgyemang/ccss_web_api_tool.git
     # via -r requirements.in
+celery==5.6.3
+    # via
+    #   dvc
+    #   dvc-task
 certifi==2026.2.25
     # via
     #   httpcore
@@ -91,26 +121,43 @@ certifi==2026.2.25
     #   msrest
     #   requests
 cffi==2.0.0
-    # via cryptography
+    # via
+    #   cryptography
+    #   pygit2
 cfgv==3.5.0
     # via pre-commit
 charset-normalizer==3.4.6
     # via requests
 click==8.3.1
     # via
+    #   celery
+    #   click-didyoumean
+    #   click-plugins
+    #   click-repl
     #   mlflow-skinny
     #   pip-tools
+    #   typer
     #   uvicorn
+click-didyoumean==0.3.1
+    # via celery
+click-plugins==1.1.1.2
+    # via celery
+click-repl==0.3.0
+    # via celery
 cloudpickle==3.1.2
     # via mlflow-skinny
 colorama==0.4.6
     # via
     #   azure-ai-ml
+    #   dvc
     #   griffecli
+configobj==5.0.9
+    # via dvc
 contourpy==1.3.3
     # via matplotlib
 cryptography==46.0.5
     # via
+    #   asyncssh
     #   azure-identity
     #   azure-storage-blob
     #   azure-storage-file-share
@@ -124,13 +171,44 @@ databricks-sdk==0.102.0
     # via mlflow-skinny
 dataclasses-json==0.6.7
     # via langchain-community
+dictdiffer==0.9.0
+    # via dvc-data
+diskcache==5.6.3
+    # via dvc-data
 distlib==0.4.0
     # via virtualenv
 distro==1.9.0
     # via
+    #   dvc
     #   google-genai
     #   groq
+    #   iterative-telemetry
     #   openai
+dpath==2.2.0
+    # via dvc
+dulwich==1.2.1
+    # via
+    #   dvc
+    #   dvc-studio-client
+    #   scmrepo
+dvc==3.67.1
+    # via -r requirements.in
+dvc-data==3.18.3
+    # via dvc
+dvc-http==2.32.0
+    # via dvc
+dvc-objects==5.2.0
+    # via
+    #   dvc
+    #   dvc-data
+dvc-render==1.0.2
+    # via dvc
+dvc-studio-client==0.22.0
+    # via dvc
+dvc-task==0.40.2
+    # via dvc
+entrypoints==0.4
+    # via gto
 et-xmlfile==2.0.0
     # via openpyxl
 fastapi==0.135.2
@@ -139,26 +217,50 @@ fastapi==0.135.2
     #   mlflow-skinny
 filelock==3.25.2
     # via
+    #   iterative-telemetry
     #   python-discovery
     #   virtualenv
+flatten-dict==0.5.0
+    # via dvc
+flufl-lock==9.1.0
+    # via dvc
 fonttools==4.62.1
     # via matplotlib
 frozenlist==1.8.0
     # via
     #   aiohttp
     #   aiosignal
+fsspec[http,tqdm]==2026.4.0
+    # via
+    #   dvc
+    #   dvc-data
+    #   dvc-http
+    #   dvc-objects
+    #   scmrepo
+funcy==2.0
+    # via
+    #   dvc
+    #   dvc-data
+    #   dvc-objects
+    #   dvc-task
+    #   gto
+    #   scmrepo
 genai-prices==0.0.56
     # via pydantic-ai-slim
 gitdb==4.0.12
     # via gitpython
 gitpython==3.1.46
-    # via mlflow-skinny
+    # via
+    #   mlflow-skinny
+    #   scmrepo
 google-auth[requests]==2.49.1
     # via
     #   databricks-sdk
     #   google-genai
 google-genai==1.68.0
     # via pydantic-ai-slim
+grandalf==0.8
+    # via dvc
 griffe==2.0.1
     # via pydantic-ai-slim
 griffecli==2.0.1
@@ -169,6 +271,8 @@ griffelib==2.0.1
     #   griffecli
 groq==1.1.2
     # via pydantic-ai-slim
+gto==1.9.0
+    # via dvc
 h11==0.16.0
     # via
     #   httpcore
@@ -187,6 +291,8 @@ httpx==0.28.1
     #   pydantic-graph
 httpx-sse==0.4.3
     # via langchain-community
+hydra-core==1.3.2
+    # via dvc
 identify==2.6.18
     # via pre-commit
 idna==3.11
@@ -209,6 +315,8 @@ isodate==0.7.2
     #   azure-storage-file-datalake
     #   azure-storage-file-share
     #   msrest
+iterative-telemetry==0.0.10
+    # via dvc
 jiter==0.13.0
     # via openai
 joblib==1.5.3
@@ -225,6 +333,11 @@ jsonschema-specifications==2025.9.1
     # via jsonschema
 kiwisolver==1.5.0
     # via matplotlib
+kombu==5.6.2
+    # via
+    #   celery
+    #   dvc
+    #   dvc-task
 langchain==1.2.13
     # via -r requirements.in
 langchain-classic==1.0.3
@@ -263,12 +376,16 @@ langsmith==0.7.22
     #   langchain-core
 logfire-api==4.30.0
     # via pydantic-graph
+markdown-it-py==4.2.0
+    # via rich
 marshmallow==3.26.2
     # via
     #   azure-ai-ml
     #   dataclasses-json
 matplotlib==3.10.9
     # via -r requirements.in
+mdurl==0.1.2
+    # via markdown-it-py
 mlflow-skinny==3.5.0
     # via azureml-mlflow
 msal==1.35.1
@@ -287,6 +404,8 @@ multidict==6.7.1
     #   yarl
 mypy-extensions==1.1.0
     # via typing-inspect
+networkx==3.6.1
+    # via dvc
 nodeenv==1.10.0
     # via pre-commit
 numpy==2.4.3
@@ -299,6 +418,10 @@ numpy==2.4.3
     #   scipy
 oauthlib==3.3.1
     # via requests-oauthlib
+omegaconf==2.3.0
+    # via
+    #   dvc
+    #   hydra-core
 openai==2.29.0
     # via
     #   langchain-openai
@@ -397,13 +520,18 @@ opentelemetry-util-http==0.61b0
     #   opentelemetry-instrumentation-wsgi
 orjson==3.11.7
     # via
+    #   dvc-data
     #   langgraph-sdk
     #   langsmith
+    #   sqltrie
 ormsgpack==1.12.2
     # via langgraph-checkpoint
 packaging==25.0
     # via
     #   build
+    #   dvc
+    #   hydra-core
+    #   kombu
     #   langchain-core
     #   langsmith
     #   marshmallow
@@ -417,18 +545,25 @@ pandas==3.0.1
     # via
     #   -r requirements.in
     #   ccs-web-api
+pathspec==1.1.1
+    # via
+    #   dvc
+    #   scmrepo
 pillow==12.2.0
     # via matplotlib
 pip-tools==7.5.3
     # via -r requirements.in
 platformdirs==4.9.4
     # via
+    #   dvc
     #   python-discovery
     #   virtualenv
 pluggy==1.6.0
     # via pytest
 pre-commit==4.5.1
     # via -r requirements.in
+prompt-toolkit==3.0.52
+    # via click-repl
 propcache==0.4.1
     # via
     #   aiohttp
@@ -439,7 +574,10 @@ protobuf==6.33.6
     #   mlflow-skinny
     #   opentelemetry-proto
 psutil==7.2.2
-    # via azure-monitor-opentelemetry-exporter
+    # via
+    #   azure-monitor-opentelemetry-exporter
+    #   dvc
+    #   flufl-lock
 pyasn1==0.6.3
     # via pyasn1-modules
 pyasn1-modules==0.4.2
@@ -452,6 +590,7 @@ pydantic==2.12.5
     #   genai-prices
     #   google-genai
     #   groq
+    #   gto
     #   langchain
     #   langchain-classic
     #   langchain-core
@@ -469,17 +608,35 @@ pydantic-core==2.41.5
 pydantic-graph==1.59.0
     # via pydantic-ai-slim
 pydantic-settings==2.13.1
-    # via langchain-community
+    # via
+    #   gto
+    #   langchain-community
 pydash==8.0.6
     # via azure-ai-ml
+pydot==4.0.1
+    # via dvc
+pygit2==1.19.2
+    # via scmrepo
 pygments==2.19.2
-    # via pytest
+    # via
+    #   pytest
+    #   rich
+pygtrie==2.5.0
+    # via
+    #   dvc
+    #   dvc-data
+    #   scmrepo
+    #   sqltrie
 pyjwt[crypto]==2.12.1
     # via
     #   azure-ai-ml
     #   msal
 pyparsing==3.3.2
-    # via matplotlib
+    # via
+    #   dvc
+    #   grandalf
+    #   matplotlib
+    #   pydot
 pyproject-hooks==1.2.0
     # via
     #   build
@@ -489,6 +646,7 @@ pytest==9.0.2
 python-dateutil==2.9.0.post0
     # via
     #   azureml-mlflow
+    #   celery
     #   matplotlib
     #   pandas
     #   strictyaml
@@ -508,6 +666,7 @@ pyyaml==6.0.3
     #   langchain-community
     #   langchain-core
     #   mlflow-skinny
+    #   omegaconf
     #   pre-commit
 referencing==0.37.0
     # via
@@ -520,8 +679,11 @@ requests==2.32.5
     #   azure-core
     #   ccs-web-api
     #   databricks-sdk
+    #   dvc
+    #   dvc-studio-client
     #   google-auth
     #   google-genai
+    #   iterative-telemetry
     #   langchain-classic
     #   langchain-community
     #   langsmith
@@ -535,16 +697,39 @@ requests-oauthlib==2.0.0
     # via msrest
 requests-toolbelt==1.0.0
     # via langsmith
+rich==15.0.0
+    # via
+    #   dvc
+    #   gto
+    #   typer
 rpds-py==0.30.0
     # via
     #   jsonschema
     #   referencing
+ruamel-yaml==0.19.1
+    # via
+    #   dvc
+    #   gto
 ruff==0.15.1
     # via -r requirements.in
 scikit-learn==1.8.0
     # via -r requirements.in
 scipy==1.17.1
     # via scikit-learn
+scmrepo==3.6.2
+    # via
+    #   dvc
+    #   gto
+semver==3.0.4
+    # via gto
+shellingham==1.5.4
+    # via typer
+shortuuid==1.0.13
+    # via
+    #   dvc
+    #   dvc-task
+shtab==1.8.0
+    # via dvc
 six==1.17.0
     # via python-dateutil
 smmap==5.0.3
@@ -562,10 +747,16 @@ sqlalchemy==2.0.48
     #   langchain-community
 sqlparse==0.5.5
     # via mlflow-skinny
+sqltrie==0.11.2
+    # via dvc-data
 starlette==1.0.0
     # via fastapi
 strictyaml==1.7.3
     # via azure-ai-ml
+tabulate==0.10.0
+    # via
+    #   dvc
+    #   gto
 tenacity==9.1.4
     # via
     #   google-genai
@@ -577,14 +768,23 @@ tiktoken==0.12.0
     # via
     #   langchain-openai
     #   pydantic-ai-slim
+tomlkit==0.15.0
+    # via dvc
 tqdm==4.67.3
     # via
     #   azure-ai-ml
+    #   dvc
+    #   dvc-data
+    #   fsspec
     #   openai
+    #   scmrepo
+typer==0.25.1
+    # via gto
 typing-extensions==4.15.0
     # via
     #   aiosignal
     #   anyio
+    #   asyncssh
     #   azure-ai-ml
     #   azure-core
     #   azure-identity
@@ -593,6 +793,7 @@ typing-extensions==4.15.0
     #   azure-storage-file-datalake
     #   azure-storage-file-share
     #   beautifulsoup4
+    #   dulwich
     #   fastapi
     #   google-genai
     #   groq
@@ -619,8 +820,14 @@ typing-inspection==0.4.2
     #   pydantic-ai-slim
     #   pydantic-graph
     #   pydantic-settings
+tzdata==2026.2
+    # via kombu
+tzlocal==5.3.1
+    # via celery
 urllib3==2.6.3
-    # via requests
+    # via
+    #   dulwich
+    #   requests
 uuid-utils==0.14.1
     # via
     #   langchain-core
@@ -629,8 +836,19 @@ uvicorn==0.42.0
     # via
     #   -r requirements.in
     #   mlflow-skinny
+vine==5.1.0
+    # via
+    #   amqp
+    #   celery
+    #   kombu
 virtualenv==21.2.0
     # via pre-commit
+voluptuous==0.16.0
+    # via
+    #   dvc
+    #   dvc-studio-client
+wcwidth==0.7.0
+    # via prompt-toolkit
 websockets==16.0
     # via google-genai
 wheel==0.46.3
@@ -646,6 +864,8 @@ xxhash==3.6.0
     #   langsmith
 yarl==1.23.0
     # via aiohttp
+zc-lockfile==4.0
+    # via dvc
 zipp==3.23.0
     # via importlib-metadata
 zstandard==0.25.0

@@ -12,7 +12,7 @@ MARGINS=(1 5 10)
 # Get the repository root (two levels up from src/utils)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-EVALUATION_SCRIPT="$REPO_ROOT/evaluation/run_evaluation.py"
+EVALUATION_SCRIPT="$REPO_ROOT/eval/run_eval.py"
 TRUTHSET_PATH="$REPO_ROOT/new_AI_results_for_Jasmine.xlsx"
 
 # Verify the evaluation script exists

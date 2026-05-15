@@ -2,6 +2,9 @@
 pip
 pip-tools
 
+# Pipeline & Workflow
+dvc
+
 # Core Framework
 langchain
 langchain-core
