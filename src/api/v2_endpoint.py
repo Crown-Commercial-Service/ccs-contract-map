@@ -62,7 +62,7 @@ class ContractDescription(BaseModel):
     description: str
 
 
-@app.post("/map")
+@app.post("/v1/map")
 @cache(expire=3600)
 async def run_contract_mapper(body: ContractDescription):
     try:
