@@ -6,11 +6,10 @@
 #
 aiohappyeyeballs==2.6.1
     # via aiohttp
-aiohttp==3.13.3
+aiohttp==3.13.5
     # via
     #   aiohttp-retry
     #   fsspec
-    #   langchain-community
 aiohttp-retry==2.9.1
     # via
     #   dvc-http
@@ -52,13 +51,11 @@ attrs==26.1.0
     #   jsonschema
     #   referencing
     #   sqltrie
-azure-ai-ml==1.32.0
+azure-ai-ml==1.33.0
     # via -r requirements.in
 azure-common==1.1.28
-    # via
-    #   azure-ai-ml
-    #   azure-search-documents
-azure-core==1.39.0
+    # via azureml-mlflow
+azure-core==1.41.0
     # via
     #   azure-ai-ml
     #   azure-core-tracing-opentelemetry
@@ -72,22 +69,23 @@ azure-core==1.39.0
     #   azure-storage-file-share
     #   azureml-mlflow
     #   msrest
-azure-core-tracing-opentelemetry==1.0.0b12
+azure-core-tracing-opentelemetry==1.0.0b13
     # via azure-monitor-opentelemetry
 azure-identity==1.25.3
     # via
     #   -r requirements.in
     #   azure-monitor-opentelemetry-exporter
     #   azureml-mlflow
+    #   redis-entraid
 azure-mgmt-core==1.6.0
     # via
     #   azure-ai-ml
     #   azureml-mlflow
-azure-monitor-opentelemetry==1.8.7
+azure-monitor-opentelemetry==1.8.2
     # via azure-ai-ml
-azure-monitor-opentelemetry-exporter==1.0.0b49
+azure-monitor-opentelemetry-exporter==1.0.0b45
     # via azure-monitor-opentelemetry
-azure-search-documents==11.6.0
+azure-search-documents==12.0.0
     # via -r requirements.in
 azure-storage-blob==12.27.1
     # via
@@ -96,15 +94,15 @@ azure-storage-blob==12.27.1
     #   azureml-mlflow
 azure-storage-file-datalake==12.22.0
     # via azure-ai-ml
-azure-storage-file-share==12.24.0
+azure-storage-file-share==12.25.0
     # via azure-ai-ml
-azureml-mlflow==1.62.0.post1
+azureml-mlflow==1.62.0.post2
     # via -r requirements.in
 beautifulsoup4==4.14.3
     # via ccs-web-api
 billiard==4.2.4
     # via celery
-build==1.4.2
+build==1.5.0
     # via pip-tools
 cachetools==6.2.6
     # via mlflow-skinny
@@ -114,7 +112,7 @@ celery==5.6.3
     # via
     #   dvc
     #   dvc-task
-certifi==2026.2.25
+certifi==2026.4.22
     # via
     #   httpcore
     #   httpx
@@ -126,9 +124,9 @@ cffi==2.0.0
     #   pygit2
 cfgv==3.5.0
     # via pre-commit
-charset-normalizer==3.4.6
+charset-normalizer==3.4.7
     # via requests
-click==8.3.1
+click==8.4.0
     # via
     #   celery
     #   click-didyoumean
@@ -155,7 +153,7 @@ configobj==5.0.9
     # via dvc
 contourpy==1.3.3
     # via matplotlib
-cryptography==46.0.5
+cryptography==46.0.7
     # via
     #   asyncssh
     #   azure-identity
@@ -167,10 +165,8 @@ cryptography==46.0.5
     #   pyjwt
 cycler==0.12.1
     # via matplotlib
-databricks-sdk==0.102.0
+databricks-sdk==0.110.0
     # via mlflow-skinny
-dataclasses-json==0.6.7
-    # via langchain-community
 dictdiffer==0.9.0
     # via dvc-data
 diskcache==5.6.3
@@ -211,11 +207,14 @@ entrypoints==0.4
     # via gto
 et-xmlfile==2.0.0
     # via openpyxl
-fastapi==0.135.2
+fastapi==0.136.1
     # via
     #   -r requirements.in
+    #   fastapi-cache2
     #   mlflow-skinny
-filelock==3.25.2
+fastapi-cache2==0.2.2
+    # via -r requirements.in
+filelock==3.29.0
     # via
     #   iterative-telemetry
     #   python-discovery
@@ -224,7 +223,7 @@ flatten-dict==0.5.0
     # via dvc
 flufl-lock==9.1.0
     # via dvc
-fonttools==4.62.1
+fonttools==4.63.0
     # via matplotlib
 frozenlist==1.8.0
     # via
@@ -245,31 +244,31 @@ funcy==2.0
     #   dvc-task
     #   gto
     #   scmrepo
-genai-prices==0.0.56
+genai-prices==0.0.60
     # via pydantic-ai-slim
 gitdb==4.0.12
     # via gitpython
-gitpython==3.1.46
+gitpython==3.1.50
     # via
     #   mlflow-skinny
     #   scmrepo
-google-auth[requests]==2.49.1
+google-auth[requests]==2.53.0
     # via
     #   databricks-sdk
     #   google-genai
-google-genai==1.68.0
+google-genai==2.4.0
     # via pydantic-ai-slim
 grandalf==0.8
     # via dvc
-griffe==2.0.1
+griffe==2.0.2
     # via pydantic-ai-slim
-griffecli==2.0.1
+griffecli==2.0.2
     # via griffe
-griffelib==2.0.1
+griffelib==2.0.2
     # via
     #   griffe
     #   griffecli
-groq==1.1.2
+groq==1.2.0
     # via pydantic-ai-slim
 gto==1.9.0
     # via dvc
@@ -289,22 +288,18 @@ httpx==0.28.1
     #   openai
     #   pydantic-ai-slim
     #   pydantic-graph
-httpx-sse==0.4.3
-    # via langchain-community
 hydra-core==1.3.2
     # via dvc
-identify==2.6.18
+identify==2.6.19
     # via pre-commit
-idna==3.11
+idna==3.15
     # via
     #   anyio
     #   httpx
     #   requests
     #   yarl
-importlib-metadata==8.7.1
-    # via
-    #   mlflow-skinny
-    #   opentelemetry-api
+importlib-metadata==8.9.0
+    # via mlflow-skinny
 iniconfig==2.3.0
     # via pytest
 isodate==0.7.2
@@ -317,7 +312,9 @@ isodate==0.7.2
     #   msrest
 iterative-telemetry==0.0.10
     # via dvc
-jiter==0.13.0
+jinja2==3.1.6
+    # via -r requirements.in
+jiter==0.15.0
     # via openai
 joblib==1.5.3
     # via scikit-learn
@@ -338,60 +335,50 @@ kombu==5.6.2
     #   celery
     #   dvc
     #   dvc-task
-langchain==1.2.13
+langchain==1.3.1
     # via -r requirements.in
-langchain-classic==1.0.3
-    # via langchain-community
-langchain-community==0.4.1
-    # via -r requirements.in
-langchain-core==1.2.22
+langchain-core==1.4.0
     # via
-    #   -r requirements.in
     #   langchain
-    #   langchain-classic
-    #   langchain-community
     #   langchain-openai
-    #   langchain-text-splitters
     #   langgraph
     #   langgraph-checkpoint
     #   langgraph-prebuilt
-langchain-openai==1.1.12
+langchain-openai==1.2.1
     # via -r requirements.in
-langchain-text-splitters==1.1.1
-    # via langchain-classic
-langgraph==1.1.3
+langchain-protocol==0.0.15
+    # via langchain-core
+langgraph==1.2.0
     # via langchain
-langgraph-checkpoint==4.0.1
+langgraph-checkpoint==4.1.0
     # via
     #   langgraph
     #   langgraph-prebuilt
-langgraph-prebuilt==1.0.8
+langgraph-prebuilt==1.1.0
     # via langgraph
-langgraph-sdk==0.3.12
+langgraph-sdk==0.3.14
     # via langgraph
-langsmith==0.7.22
-    # via
-    #   langchain-classic
-    #   langchain-community
-    #   langchain-core
-logfire-api==4.30.0
+langsmith==0.8.5
+    # via langchain-core
+logfire-api==4.33.0
     # via pydantic-graph
 markdown-it-py==4.2.0
     # via rich
+markupsafe==3.0.3
+    # via jinja2
 marshmallow==3.26.2
-    # via
-    #   azure-ai-ml
-    #   dataclasses-json
+    # via azure-ai-ml
 matplotlib==3.10.9
     # via -r requirements.in
 mdurl==0.1.2
     # via markdown-it-py
-mlflow-skinny==3.5.0
+mlflow-skinny==3.9.0
     # via azureml-mlflow
-msal==1.35.1
+msal==1.36.0
     # via
     #   azure-identity
     #   msal-extensions
+    #   redis-entraid
 msal-extensions==1.3.1
     # via azure-identity
 msrest==0.7.1
@@ -402,16 +389,13 @@ multidict==6.7.1
     # via
     #   aiohttp
     #   yarl
-mypy-extensions==1.1.0
-    # via typing-inspect
 networkx==3.6.1
     # via dvc
 nodeenv==1.10.0
     # via pre-commit
-numpy==2.4.3
+numpy==2.4.6
     # via
     #   contourpy
-    #   langchain-community
     #   matplotlib
     #   pandas
     #   scikit-learn
@@ -422,13 +406,13 @@ omegaconf==2.3.0
     # via
     #   dvc
     #   hydra-core
-openai==2.29.0
+openai==2.37.0
     # via
     #   langchain-openai
     #   pydantic-ai-slim
 openpyxl==3.1.5
     # via -r requirements.in
-opentelemetry-api==1.40.0
+opentelemetry-api==1.42.0
     # via
     #   azure-core-tracing-opentelemetry
     #   azure-monitor-opentelemetry-exporter
@@ -439,7 +423,6 @@ opentelemetry-api==1.40.0
     #   opentelemetry-instrumentation-django
     #   opentelemetry-instrumentation-fastapi
     #   opentelemetry-instrumentation-flask
-    #   opentelemetry-instrumentation-logging
     #   opentelemetry-instrumentation-psycopg2
     #   opentelemetry-instrumentation-requests
     #   opentelemetry-instrumentation-urllib
@@ -448,54 +431,51 @@ opentelemetry-api==1.40.0
     #   opentelemetry-sdk
     #   opentelemetry-semantic-conventions
     #   pydantic-ai-slim
-opentelemetry-instrumentation==0.61b0
+opentelemetry-instrumentation==0.63b0
     # via
     #   opentelemetry-instrumentation-asgi
     #   opentelemetry-instrumentation-dbapi
     #   opentelemetry-instrumentation-django
     #   opentelemetry-instrumentation-fastapi
     #   opentelemetry-instrumentation-flask
-    #   opentelemetry-instrumentation-logging
     #   opentelemetry-instrumentation-psycopg2
     #   opentelemetry-instrumentation-requests
     #   opentelemetry-instrumentation-urllib
     #   opentelemetry-instrumentation-urllib3
     #   opentelemetry-instrumentation-wsgi
-opentelemetry-instrumentation-asgi==0.61b0
+opentelemetry-instrumentation-asgi==0.63b0
     # via opentelemetry-instrumentation-fastapi
-opentelemetry-instrumentation-dbapi==0.61b0
+opentelemetry-instrumentation-dbapi==0.63b0
     # via opentelemetry-instrumentation-psycopg2
-opentelemetry-instrumentation-django==0.61b0
+opentelemetry-instrumentation-django==0.63b0
     # via azure-monitor-opentelemetry
-opentelemetry-instrumentation-fastapi==0.61b0
+opentelemetry-instrumentation-fastapi==0.63b0
     # via azure-monitor-opentelemetry
-opentelemetry-instrumentation-flask==0.61b0
+opentelemetry-instrumentation-flask==0.63b0
     # via azure-monitor-opentelemetry
-opentelemetry-instrumentation-logging==0.61b0
+opentelemetry-instrumentation-psycopg2==0.63b0
     # via azure-monitor-opentelemetry
-opentelemetry-instrumentation-psycopg2==0.61b0
+opentelemetry-instrumentation-requests==0.63b0
     # via azure-monitor-opentelemetry
-opentelemetry-instrumentation-requests==0.61b0
+opentelemetry-instrumentation-urllib==0.63b0
     # via azure-monitor-opentelemetry
-opentelemetry-instrumentation-urllib==0.61b0
+opentelemetry-instrumentation-urllib3==0.63b0
     # via azure-monitor-opentelemetry
-opentelemetry-instrumentation-urllib3==0.61b0
-    # via azure-monitor-opentelemetry
-opentelemetry-instrumentation-wsgi==0.61b0
+opentelemetry-instrumentation-wsgi==0.63b0
     # via
     #   opentelemetry-instrumentation-django
     #   opentelemetry-instrumentation-flask
-opentelemetry-proto==1.40.0
+opentelemetry-proto==1.42.0
     # via mlflow-skinny
 opentelemetry-resource-detector-azure==0.1.5
     # via azure-monitor-opentelemetry
-opentelemetry-sdk==1.40.0
+opentelemetry-sdk==1.42.0
     # via
     #   azure-monitor-opentelemetry
     #   azure-monitor-opentelemetry-exporter
     #   mlflow-skinny
     #   opentelemetry-resource-detector-azure
-opentelemetry-semantic-conventions==0.61b0
+opentelemetry-semantic-conventions==0.63b0
     # via
     #   opentelemetry-instrumentation
     #   opentelemetry-instrumentation-asgi
@@ -508,7 +488,7 @@ opentelemetry-semantic-conventions==0.61b0
     #   opentelemetry-instrumentation-urllib3
     #   opentelemetry-instrumentation-wsgi
     #   opentelemetry-sdk
-opentelemetry-util-http==0.61b0
+opentelemetry-util-http==0.63b0
     # via
     #   opentelemetry-instrumentation-asgi
     #   opentelemetry-instrumentation-django
@@ -518,7 +498,7 @@ opentelemetry-util-http==0.61b0
     #   opentelemetry-instrumentation-urllib
     #   opentelemetry-instrumentation-urllib3
     #   opentelemetry-instrumentation-wsgi
-orjson==3.11.7
+orjson==3.11.9
     # via
     #   dvc-data
     #   langgraph-sdk
@@ -541,7 +521,7 @@ packaging==25.0
     #   opentelemetry-instrumentation-flask
     #   pytest
     #   wheel
-pandas==3.0.1
+pandas==3.0.3
     # via
     #   -r requirements.in
     #   ccs-web-api
@@ -549,22 +529,24 @@ pathspec==1.1.1
     # via
     #   dvc
     #   scmrepo
+pendulum==3.2.0
+    # via fastapi-cache2
 pillow==12.2.0
     # via matplotlib
 pip-tools==7.5.3
     # via -r requirements.in
-platformdirs==4.9.4
+platformdirs==4.9.6
     # via
     #   dvc
     #   python-discovery
     #   virtualenv
 pluggy==1.6.0
     # via pytest
-pre-commit==4.5.1
+pre-commit==4.6.0
     # via -r requirements.in
 prompt-toolkit==3.0.52
     # via click-repl
-propcache==0.4.1
+propcache==0.5.2
     # via
     #   aiohttp
     #   yarl
@@ -584,7 +566,7 @@ pyasn1-modules==0.4.2
     # via google-auth
 pycparser==3.0
     # via cffi
-pydantic==2.12.5
+pydantic==2.13.4
     # via
     #   fastapi
     #   genai-prices
@@ -592,7 +574,6 @@ pydantic==2.12.5
     #   groq
     #   gto
     #   langchain
-    #   langchain-classic
     #   langchain-core
     #   langgraph
     #   langsmith
@@ -603,21 +584,19 @@ pydantic==2.12.5
     #   pydantic-settings
 pydantic-ai-slim[google,groq,openai]==1.59.0
     # via -r requirements.in
-pydantic-core==2.41.5
+pydantic-core==2.46.4
     # via pydantic
 pydantic-graph==1.59.0
     # via pydantic-ai-slim
-pydantic-settings==2.13.1
-    # via
-    #   gto
-    #   langchain-community
+pydantic-settings==2.14.1
+    # via gto
 pydash==8.0.6
     # via azure-ai-ml
 pydot==4.0.1
     # via dvc
 pygit2==1.19.2
     # via scmrepo
-pygments==2.19.2
+pygments==2.20.0
     # via
     #   pytest
     #   rich
@@ -631,6 +610,7 @@ pyjwt[crypto]==2.12.1
     # via
     #   azure-ai-ml
     #   msal
+    #   redis-entraid
 pyparsing==3.3.2
     # via
     #   dvc
@@ -641,7 +621,7 @@ pyproject-hooks==1.2.0
     # via
     #   build
     #   pip-tools
-pytest==9.0.2
+pytest==9.0.3
     # via -r requirements.in
 python-dateutil==2.9.0.post0
     # via
@@ -649,8 +629,9 @@ python-dateutil==2.9.0.post0
     #   celery
     #   matplotlib
     #   pandas
+    #   pendulum
     #   strictyaml
-python-discovery==1.2.0
+python-discovery==1.3.1
     # via virtualenv
 python-dotenv==1.2.2
     # via
@@ -662,19 +643,23 @@ pytz==2025.2
 pyyaml==6.0.3
     # via
     #   azure-ai-ml
-    #   langchain-classic
-    #   langchain-community
     #   langchain-core
     #   mlflow-skinny
     #   omegaconf
     #   pre-commit
+redis==7.4.0
+    # via
+    #   -r requirements.in
+    #   redis-entraid
+redis-entraid==1.2.0
+    # via -r requirements.in
 referencing==0.37.0
     # via
     #   jsonschema
     #   jsonschema-specifications
-regex==2026.2.28
+regex==2026.5.9
     # via tiktoken
-requests==2.32.5
+requests==2.34.2
     # via
     #   azure-core
     #   ccs-web-api
@@ -684,12 +669,11 @@ requests==2.32.5
     #   google-auth
     #   google-genai
     #   iterative-telemetry
-    #   langchain-classic
-    #   langchain-community
     #   langsmith
     #   mlflow-skinny
     #   msal
     #   msrest
+    #   redis-entraid
     #   requests-oauthlib
     #   requests-toolbelt
     #   tiktoken
@@ -710,7 +694,7 @@ ruamel-yaml==0.19.1
     # via
     #   dvc
     #   gto
-ruff==0.15.1
+ruff==0.15.13
     # via -r requirements.in
 scikit-learn==1.8.0
     # via -r requirements.in
@@ -741,10 +725,6 @@ sniffio==1.3.1
     #   openai
 soupsieve==2.8.3
     # via beautifulsoup4
-sqlalchemy==2.0.48
-    # via
-    #   langchain-classic
-    #   langchain-community
 sqlparse==0.5.5
     # via mlflow-skinny
 sqltrie==0.11.2
@@ -760,11 +740,10 @@ tabulate==0.10.0
 tenacity==9.1.4
     # via
     #   google-genai
-    #   langchain-community
     #   langchain-core
 threadpoolctl==3.6.0
     # via scikit-learn
-tiktoken==0.12.0
+tiktoken==0.13.0
     # via
     #   langchain-openai
     #   pydantic-ai-slim
@@ -795,9 +774,11 @@ typing-extensions==4.15.0
     #   beautifulsoup4
     #   dulwich
     #   fastapi
+    #   fastapi-cache2
     #   google-genai
     #   groq
     #   langchain-core
+    #   langchain-protocol
     #   mlflow-skinny
     #   openai
     #   opentelemetry-api
@@ -807,12 +788,8 @@ typing-extensions==4.15.0
     #   pydantic-core
     #   pydash
     #   referencing
-    #   sqlalchemy
     #   starlette
-    #   typing-inspect
     #   typing-inspection
-typing-inspect==0.9.0
-    # via dataclasses-json
 typing-inspection==0.4.2
     # via
     #   fastapi
@@ -821,27 +798,30 @@ typing-inspection==0.4.2
     #   pydantic-graph
     #   pydantic-settings
 tzdata==2026.2
-    # via kombu
+    # via
+    #   kombu
+    #   pendulum
 tzlocal==5.3.1
     # via celery
-urllib3==2.6.3
+urllib3==2.7.0
     # via
     #   dulwich
     #   requests
-uuid-utils==0.14.1
+uuid-utils==0.16.0
     # via
     #   langchain-core
     #   langsmith
-uvicorn==0.42.0
+uvicorn==0.47.0
     # via
     #   -r requirements.in
+    #   fastapi-cache2
     #   mlflow-skinny
 vine==5.1.0
     # via
     #   amqp
     #   celery
     #   kombu
-virtualenv==21.2.0
+virtualenv==21.3.3
     # via pre-commit
 voluptuous==0.16.0
     # via
@@ -851,14 +831,14 @@ wcwidth==0.7.0
     # via prompt-toolkit
 websockets==16.0
     # via google-genai
-wheel==0.46.3
+wheel==0.47.0
     # via pip-tools
-wrapt==1.17.3
+wrapt==2.1.2
     # via
     #   opentelemetry-instrumentation
     #   opentelemetry-instrumentation-dbapi
     #   opentelemetry-instrumentation-urllib3
-xxhash==3.6.0
+xxhash==3.7.0
     # via
     #   langgraph
     #   langsmith
@@ -866,7 +846,7 @@ yarl==1.23.0
     # via aiohttp
 zc-lockfile==4.0
     # via dvc
-zipp==3.23.0
+zipp==4.1.0
     # via importlib-metadata
 zstandard==0.25.0
     # via langsmith

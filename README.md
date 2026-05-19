@@ -1,4 +1,4 @@
-# ccs-contract-map
+# ccs-contract-map 
 
 
 This repository provides a tool to automatically label contract descriptions using the CCS categories. It leverages a Large Language Model (LLM) to classify contract descriptions into predefined categories accurately and consistently.
@@ -60,6 +60,24 @@ Contractmap is a hybrid keyword + LLM system. When a contract description is pas
 2. LLM (optional): if there is no single category that achieves a high enough keyword matching score, the description is passed to an LLM, which uses its understanding of natural language to assign the contract to a GCA category.
 Once this process finishes, the system returns a single CCS category name.
 
+## How To Install Locally
+
+1. Create a venv:
+```
+python -m venv venv
+```
+2. Load the venv:
+```
+source venv/bin/activate
+```
+3. Update pip:
+```
+python -m pip install --upgrade pip
+```
+4. Install the dependencies:
+```
+python -m pip install -r requirements.txt
+```
 
 ## Developer Tooling (Pre-commit, Ruff, pytest)
 
@@ -68,20 +86,6 @@ This project uses:
 - [pre-commit](https://pre-commit.com/) for running checks automatically before each commit.
 - [Ruff](https://docs.astral.sh/ruff/) for fast linting.
 - [pytest](https://docs.pytest.org/) for unit testing.
-
-### Install tooling
-
-If you already installed dependencies from `requirements.txt`, install the remaining developer tools:
-
-```bash
-python -m pip install pre-commit ruff
-```
-
-Or install all at once:
-
-```bash
-python -m pip install -r requirements.txt pre-commit ruff
-```
 
 ### Set up pre-commit hooks
 
