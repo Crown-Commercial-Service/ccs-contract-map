@@ -1,6 +1,7 @@
+from src.core.classification_v2 import contract_mapper_v2
+from fastapi import FastAPI, HTTPException, status
 import os
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
 from pydantic import BaseModel
 
 # Redis & Identity Imports
@@ -69,5 +70,10 @@ async def run_contract_mapper(body: ContractDescription):
         print(response)
         return {"AI_label": response}
     except Exception as e:
-        print("Error:", e)
-        return {"error": str(e)}
+        print(f"Internal Server Error: {e}")
+
+        # Raise an HTTPException so FastAPI returns a 500 status code
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An internal error occurred while processing the contract mapping."
+        )
