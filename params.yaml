@@ -6,7 +6,7 @@ data:
   train_tsv: "new_AI_results_for_Jasmine_train.tsv"
   test_tsv: "new_AI_results_for_Jasmine_test.tsv"
   train_split_ratio: 0.8
-  semantic_anchors_json: "semantic_anchors2.json"
+  semantic_anchors_json: "semantic_anchors.json"
 
 # Grid Search Parameters
 gridsearch:
