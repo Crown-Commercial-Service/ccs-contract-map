@@ -131,15 +131,20 @@ def build_semantic_anchors(
         final_cleaned_registry[cat] = [clean_p, clean_s]
 
     # --- FINAL SAVE ---
+    # sort alphabetically for readability
+    sorted_registry = {
+        cat: [sorted(primary), sorted(secondary)]
+        for cat, (primary, secondary) in sorted(final_cleaned_registry.items())
+    }
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(final_cleaned_registry, f, indent=4, ensure_ascii=False)
+        json.dump(sorted_registry, f, indent=4, ensure_ascii=False)
 
     print(
-        f"Successfully saved {len(final_cleaned_registry)} cleaned categories to {output_path}"
+        f"Successfully saved {len(sorted_registry)} cleaned categories to {output_path}"
     )
 
-    return final_cleaned_registry
+    return sorted_registry
 
 
 def main():
