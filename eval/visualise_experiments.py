@@ -157,16 +157,37 @@ def plot_optimization_surface(
     # Plot surface
     surf = ax.plot_surface(X, Y, Z, cmap="viridis", alpha=0.8, edgecolor="none")
 
-    # Add scatter points for actual data points
+    # Find best result
+    best_idx = df["accuracy_percent"].idxmax()
+    best_row = df.loc[best_idx]
+
+    # Add scatter points for actual data points (excluding best)
+    non_best_df = df[df.index != best_idx]
     ax.scatter(
-        df["threshold"],
-        df["margin"],
-        df["accuracy_percent"],
+        non_best_df["threshold"],
+        non_best_df["margin"],
+        non_best_df["accuracy_percent"],
         c="red",
         marker="o",
         s=50,
         alpha=0.6,
         label="Actual runs",
+    )
+
+    # Plot best result as a star in the legend, lifted above the surface so it
+    # is always rendered in front (matplotlib 3D sorts by Z position, not zorder)
+    z_lift = (Z[~np.isnan(Z)].max() - Z[~np.isnan(Z)].min()) * 0.05
+    ax.scatter(
+        [best_row["threshold"]],
+        [best_row["margin"]],
+        [best_row["accuracy_percent"] + z_lift],
+        marker="*",
+        s=300,
+        color="red",
+        edgecolors="black",
+        linewidth=1.5,
+        zorder=5,
+        label=f'Best: {best_row["accuracy_percent"]:.2f}% (t={best_row["threshold"]:.0f}, m={best_row["margin"]:.0f})',
     )
 
     # Labels and title
@@ -184,19 +205,6 @@ def plot_optimization_surface(
 
     # Add legend
     ax.legend(loc="upper left")
-
-    # Find and annotate best result
-    best_idx = df["accuracy_percent"].idxmax()
-    best_row = df.loc[best_idx]
-    ax.text(
-        best_row["threshold"],
-        best_row["margin"],
-        best_row["accuracy_percent"],
-        f'  Best: {best_row["accuracy_percent"]:.2f}%\n  (t={best_row["threshold"]:.0f}, m={best_row["margin"]:.0f})',
-        fontsize=10,
-        color="black",
-        weight="bold",
-    )
 
     plt.tight_layout()
 
@@ -227,12 +235,23 @@ def plot_scatterplot(
     # Create figure
     fig, ax = plt.subplots(figsize=(10, 8))
 
-    # Create scatter plot with accuracy as color
+    # Find best result
+    best_idx = df["accuracy_percent"].idxmax()
+    best_row = df.loc[best_idx]
+
+    # Shared colour scale across all points so the star matches the heatmap
+    vmin = df["accuracy_percent"].min()
+    vmax = df["accuracy_percent"].max()
+
+    # Create scatter plot with accuracy as color (excluding best point)
+    non_best_df = df[df.index != best_idx]
     scatter = ax.scatter(
-        df["threshold"],
-        df["margin"],
-        c=df["accuracy_percent"],
+        non_best_df["threshold"],
+        non_best_df["margin"],
+        c=non_best_df["accuracy_percent"],
         cmap="viridis",
+        vmin=vmin,
+        vmax=vmax,
         s=200,
         alpha=0.8,
         edgecolors="black",
@@ -243,20 +262,20 @@ def plot_scatterplot(
     cbar = plt.colorbar(scatter, ax=ax, label="Accuracy (%)")
     cbar.ax.tick_params(labelsize=10)
 
-    # Find and annotate best result
-    best_idx = df["accuracy_percent"].idxmax()
-    best_row = df.loc[best_idx]
-    ax.annotate(
-        f'Best: {best_row["accuracy_percent"]:.2f}%\n(t={best_row["threshold"]:.0f}, m={best_row["margin"]:.0f})',
-        xy=(best_row["threshold"], best_row["margin"]),
-        xytext=(10, 10),
-        textcoords="offset points",
-        fontsize=11,
-        weight="bold",
-        bbox=dict(
-            boxstyle="round,pad=0.5", facecolor="yellow", alpha=0.7, edgecolor="black"
-        ),
-        arrowprops=dict(arrowstyle="->", connectionstyle="arc3,rad=0", lw=2),
+    # Plot best result as a star, coloured by its accuracy value on the same scale
+    ax.scatter(
+        [best_row["threshold"]],
+        [best_row["margin"]],
+        c=[best_row["accuracy_percent"]],
+        cmap="viridis",
+        vmin=vmin,
+        vmax=vmax,
+        marker="*",
+        s=600,
+        edgecolors="black",
+        linewidth=1.5,
+        zorder=5,
+        label=f'Best: {best_row["accuracy_percent"]:.2f}% (t={best_row["threshold"]:.0f}, m={best_row["margin"]:.0f})',
     )
 
     # Set labels and title
@@ -275,6 +294,11 @@ def plot_scatterplot(
 
     # Adjust tick label sizes
     ax.tick_params(axis="both", labelsize=11)
+
+    # Add legend below the plot area, underneath the x-axis label
+    ax.legend(
+        loc="upper center", bbox_to_anchor=(0.5, -0.12), borderaxespad=0, fontsize=11
+    )
 
     plt.tight_layout()
 
