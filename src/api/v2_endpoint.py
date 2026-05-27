@@ -61,7 +61,7 @@ class ContractDescription(BaseModel):
 
 
 @app.post("/v1/map")
-@cache(expire=3600)
+@cache(expire=3600)# will keep cache for 1 hour or 3600 seconds
 async def run_contract_mapper(body: ContractDescription):
     try:
         response = await contract_mapper_v2(user_contract_description=body.description)
