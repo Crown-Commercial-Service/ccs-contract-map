@@ -1,4 +1,4 @@
-from core.classification_v2 import contract_mapper_v2
+from src.core.classification_v2 import contract_mapper_v2
 import pandas as pd
 from pathlib import Path
 

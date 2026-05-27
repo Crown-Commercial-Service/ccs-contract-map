@@ -1,0 +1,75 @@
+# DVC Pipeline for Contract Mapping Model Training & Evaluation
+#
+# This pipeline orchestrates:
+# 1. Data processing and train/test split
+# 2. Semantic anchor extraction from training data
+# 3. Grid search hyperparameter optimization
+# 4. Results visualization
+
+stages:
+  # Stage 1: Process truthset data and create train/test splits
+  process_data:
+    cmd: >-
+      python src/utils/process_truthset.py
+      --input ${data.input_excel}
+      --train-ratio ${data.train_split_ratio}
+    deps:
+      - src/utils/process_truthset.py
+      - ${data.input_excel}
+    params:
+      - data.input_excel
+      - data.train_split_ratio
+    outs:
+      - ${data.train_tsv}
+      - ${data.test_tsv}
+
+  # Stage 2: Extract semantic anchors from training data
+  extract_keywords:
+    cmd: >-
+      python src/utils/semantic_anchors_tool.py
+      --input-train-tsv ${data.train_tsv}
+      --output-json ${data.semantic_anchors_json}
+    deps:
+      - src/utils/semantic_anchors_tool.py
+      - ${data.train_tsv}
+    params:
+      - data.train_tsv
+      - data.semantic_anchors_json
+    outs:
+      - ${data.semantic_anchors_json}
+
+  # Stage 3: Run grid search optimization over threshold and margin parameters
+  optimize_params:
+    cmd: >-
+      python eval/run_gridsearch.py
+      --params-file params.yaml
+      --truthset ${data.input_excel}
+    deps:
+      - eval/run_gridsearch.py
+      - eval/run_eval.py
+      - ${data.semantic_anchors_json}
+      - ${data.train_tsv}
+    params:
+      - gridsearch.thresholds
+      - gridsearch.margins
+      - mlflow.experiment_name
+      - evaluation.prompt_name
+    outs:
+      - ${outputs.completion_marker}
+
+  # Stage 4: Visualize optimization results
+  visualize:
+    cmd: >-
+      python eval/visualise_experiments.py
+      --mlflow-experiment-name ${mlflow.experiment_name}
+      --plot-type surface
+      --output ${outputs.plot_output}
+      --no-show
+    deps:
+      - eval/visualise_experiments.py
+      - ${outputs.completion_marker}
+    params:
+      - mlflow.experiment_name
+      - outputs.plot_output
+    outs:
+      - ${outputs.plot_output}

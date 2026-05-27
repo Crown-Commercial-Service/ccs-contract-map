@@ -1,0 +1,28 @@
+# DVC Pipeline Parameters for Contract Mapping
+
+# Data Processing
+data:
+  input_excel: "new_AI_results_for_Jasmine.xlsx"
+  train_tsv: "new_AI_results_for_Jasmine_train.tsv"
+  test_tsv: "new_AI_results_for_Jasmine_test.tsv"
+  train_split_ratio: 0.8
+  semantic_anchors_json: "semantic_anchors.json"
+
+# Grid Search Parameters
+gridsearch:
+  thresholds: [1, 2, 3, 5, 10, 25, 50]
+  margins: [1, 5, 10]
+
+# MLflow Configuration
+mlflow:
+  experiment_name: "ContractMap-Evaluation"
+
+# Evaluation Settings
+evaluation:
+  prompt_name: "system_prompt_v2.md"
+
+# Output Paths
+outputs:
+  results_dir: "data/results"
+  completion_marker: "data/results/optimization_complete.txt"
+  plot_output: "data/results/optimization_surface.png"

@@ -1,8 +1,7 @@
-from src.core.classification_v2 import contract_mapper_v2
-from fastapi import FastAPI, HTTPException, status
-import os
-from contextlib import asynccontextmanager
+from src.core.classification_v2_mix_v5 import keywords_and_llm
+from fastapi import FastAPI,  HTTPException, status
 from pydantic import BaseModel
+from contextlib import asynccontextmanager
 
 # Redis & Identity Imports
 from redis.asyncio import Redis
@@ -13,7 +12,7 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.backends.inmemory import InMemoryBackend  # Added for fallback
 from fastapi_cache.decorator import cache
-
+import os
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -50,8 +49,6 @@ async def lifespan(app: FastAPI):
         FastAPICache.init(InMemoryBackend(), prefix="ccs-mapper-cache")
 
     yield
-    # --- Shutdown ---
-
 
 app = FastAPI(lifespan=lifespan)
 
@@ -63,8 +60,13 @@ class ContractDescription(BaseModel):
 @app.post("/v1/map")
 @cache(expire=3600)# will keep cache for 1 hour or 3600 seconds
 async def run_contract_mapper(body: ContractDescription):
+    keyword_threshold = os.getenv("KEYWORD_THRESHOLD", 3)
+    keyword_margin = os.getenv("KEYWORD_MARGIN", 5)
+
     try:
-        response = await contract_mapper_v2(user_contract_description=body.description)
+        response, _, _ = await keywords_and_llm(
+            description=body.description, threshold=int(keyword_threshold), margin=int(keyword_margin)
+        )
         print(response)
         return {"AI_label": response}
     except Exception as e:

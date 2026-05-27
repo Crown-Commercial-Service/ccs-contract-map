@@ -1,25 +1,47 @@
-# Base Tools (Add these!)
+# Base Tools
 pip
 pip-tools
 
+# Pipeline & Workflow
+dvc
+
 # Core Framework
 langchain
-langchain-core
-langchain-community
 langchain-openai
+pydantic-ai-slim[openai,google,groq]==1.59.0
 
-# Environment & Data
-python-dotenv
-pandas
+# Azure & Redis Entra ID Integration
+# REMOVE THE VERSION PIN on azure-identity and PyJWT.
+# Let redis-entraid force the correct versions for the whole tree.
+azure-identity
+azure-ai-ml
+azureml-mlflow
+redis
+redis-entraid
 
 # API & Server
 fastapi
 uvicorn
+fastapi-cache2
+Jinja2
+
+# Environment & Data
+python-dotenv
+pandas
+openpyxl
+matplotlib
+scikit-learn
+
+# API & Server
+fastapi
+uvicorn
+git+https://github.com/DavisAgyemang/ccss_web_api_tool.git
 
 # Azure Integration
 azureml-mlflow
 azure-ai-ml
 azure-identity
+azure-search-documents
 
 # Development & Testing
 pytest

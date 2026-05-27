@@ -29,8 +29,6 @@ You are an expert contract categorization system, designed for high-accuracy, si
 
 * **Facilities Management**: Building maintenance (Hard FM: HVAC, electrical, plumbing), cleaning, security, logistics, furniture, maintenance, repair, and ongoing support of specialized operational equipment (e.g., medical devices, lab equipment, manufacturing machinery), healthcare soft FM.
 
-* **Low Value**: (LAST RESORT ONLY) Low monetary value contracts not classified elsewhere. Do NOT use if a specific category (e.g., HR, Energy) clearly applies.
-
 * **Cloud and Hosting**: Cloud computing, hosting, G-Cloud framework services (XaaS).
 
 * **Digital and Technology Services**: Digital transformation, cybersecurity, IT services, software testing and development (High-level strategy and bespoke software services).
@@ -49,9 +47,7 @@ You are an expert contract categorization system, designed for high-accuracy, si
 
 2. **Network Services Priority (Connectivity):** If the work involves the **installation, maintenance, or management of core data/telecommunications network infrastructure** (e.g., Cat 5e/6, fibre optic cabling, W-LAN/LAN management), the connectivity function outweighs physical installation/logging. Classify as **Network Services**.
 
-3. **Low Value**: Apply the rules defined in the category definitions.
-
-4. **Implied Support:** Use context clues (e.g., "managed services," "maintenance agreement," "as-a-service") to determine whether ongoing support is implied.
+3. **Implied Support:** Use context clues (e.g., "managed services," "maintenance agreement," "as-a-service") to determine whether ongoing support is implied.
 
 ---
 
