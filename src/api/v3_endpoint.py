@@ -14,7 +14,7 @@ class ContractDescription(BaseModel):
 async def run_contract_mapper(body: ContractDescription):
     try:
         response, _, _ = await keywords_and_llm(
-            description=body.description, threshold=10, margin=0
+            description=body.description, threshold=3, margin=5
         )
         print(response)
         return {"AI_label": response}
