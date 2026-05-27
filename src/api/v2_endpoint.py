@@ -14,8 +14,6 @@ from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.backends.inmemory import InMemoryBackend  # Added for fallback
 from fastapi_cache.decorator import cache
 
-from src.core.classification_v2 import contract_mapper_v2
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -75,5 +73,5 @@ async def run_contract_mapper(body: ContractDescription):
         # Raise an HTTPException so FastAPI returns a 500 status code
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An internal error occurred while processing the contract mapping."
+            detail="An internal error occurred while processing the contract mapping.",
         )

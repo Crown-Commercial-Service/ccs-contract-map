@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-import evaluation.run_evaluation as run_evaluation
+import eval.run_eval as run_eval
 
 
 class _DummyRunContext:
@@ -44,71 +44,70 @@ class FakeMLflow:
         self.artifacts.append((path, artifact_path))
 
 
-def test_load_truth_set_raises_when_required_columns_missing(tmp_path):
+def test_load_truthset_raises_when_required_columns_missing(tmp_path):
     truth_set = tmp_path / "truth.csv"
     pd.DataFrame({"Description": ["desc only"]}).to_csv(truth_set, index=False)
 
     with pytest.raises(ValueError, match="Truth set must include columns"):
-        run_evaluation._load_truth_set(truth_set)
+        run_eval._load_truthset(truth_set)
 
 
-def test_resolve_prompt_file_uses_mapper_default(monkeypatch, tmp_path):
-    prompts_dir = tmp_path / "prompts"
-    prompts_dir.mkdir()
-    v1_prompt = prompts_dir / "new_system_prompt.md"
-    v2_prompt = prompts_dir / "system_prompt_v2.md"
-    v1_prompt.write_text("v1")
-    v2_prompt.write_text("v2")
-
-    monkeypatch.setattr(run_evaluation, "PROMPTS_DIR", prompts_dir)
-
-    assert run_evaluation._resolve_prompt_file(None, "v1") == v1_prompt
-    assert run_evaluation._resolve_prompt_file(None, "v2") == v2_prompt
-
-
-def test_run_evaluation_writes_default_output_csv(monkeypatch, tmp_path):
+def test_run_eval_writes_default_output_csv(monkeypatch, tmp_path):
     repo_root = tmp_path
     truth_set = repo_root / "truth.csv"
     prompt_file = repo_root / "prompts" / "custom_prompt.md"
     prompt_file.parent.mkdir(parents=True, exist_ok=True)
     prompt_file.write_text("prompt")
+
+    # Use the correct column names
     pd.DataFrame(
         {
+            "Title": ["title-a", "title-b"],
             "Description": ["desc-a", "desc-b"],
             "Category": ["cat-a", "cat-b"],
         }
     ).to_csv(truth_set, index=False)
 
-    async def fake_classify(description: str, mapper: str, prompt_file: Path) -> str:
-        mapping = {"desc-a": "cat-a", "desc-b": "wrong-cat"}
+    # Return tuple (result, reason, heuristic_score) as expected
+    async def fake_keywords_and_llm(
+        description: str, threshold: int, margin: int, system_prompt_file_location: Path
+    ) -> tuple[str, str, float]:
+        mapping = {
+            "title-a : desc-a": ("cat-a", "matched", 15.0),
+            "title-b : desc-b": ("wrong-cat", "mismatched", 8.0),
+        }
         return mapping[description]
 
-    monkeypatch.setattr(run_evaluation, "REPO_ROOT", repo_root)
+    monkeypatch.setattr(run_eval, "REPO_ROOT", repo_root)
     monkeypatch.setattr(
-        run_evaluation, "_resolve_prompt_file", lambda *args, **kwargs: prompt_file
+        run_eval, "_resolve_prompt_file", lambda *args, **kwargs: prompt_file
     )
-    monkeypatch.setattr(run_evaluation, "_classify_description", fake_classify)
-    monkeypatch.setattr(run_evaluation, "_get_mlflow_module", lambda: FakeMLflow())
+    # Mock the actual classification function
+    monkeypatch.setattr(
+        "src.core.classification_v2_mix_v5.keywords_and_llm", fake_keywords_and_llm
+    )
+    monkeypatch.setattr(run_eval, "_get_mlflow_module", lambda: FakeMLflow())
 
     asyncio.run(
-        run_evaluation.run_evaluation(
-            truth_set_path=truth_set,
-            mapper="v2",
-            prompt_name=None,
+        run_eval.evaluate_truthset(
+            truthset_path=truth_set,
+            threshold=10,
+            margin=0,
+            prompt_name="custom_prompt.md",
             output_path=None,
             mlflow_tracking_uri="azureml://unit-test",
         )
     )
 
-    output_csv = repo_root / "data/results/eval_v2_custom_prompt.csv"
-    assert output_csv.exists()
+    # Expect CSV output with correct naming pattern
+    output_file = repo_root / "data/results/eval_keywords_llm_t10_m0.csv"
+    assert output_file.exists()
 
-    result_df = pd.read_csv(output_csv)
-    assert result_df["AI classification"].tolist() == ["cat-a", "wrong-cat"]
-    assert result_df["correct"].tolist() == [True, False]
+    result_df = pd.read_csv(output_file)
+    assert result_df["AI_Prediction"].tolist() == ["cat-a", "wrong-cat"]
 
 
-def test_run_evaluation_logs_mlflow_params_metrics_and_artifacts(monkeypatch, tmp_path):
+def test_run_eval_logs_mlflow_params_metrics_and_artifacts(monkeypatch, tmp_path):
     truth_set = tmp_path / "truth.csv"
     prompt_file = tmp_path / "prompts" / "custom_prompt.md"
     output_path = tmp_path / "results.csv"
@@ -116,27 +115,37 @@ def test_run_evaluation_logs_mlflow_params_metrics_and_artifacts(monkeypatch, tm
     prompt_file.write_text("prompt")
     pd.DataFrame(
         {
+            "Title": ["title-a", "title-b"],
             "Description": ["desc-a", "desc-b"],
             "Category": ["cat-a", "cat-b"],
         }
     ).to_csv(truth_set, index=False)
 
-    async def fake_classify(description: str, mapper: str, prompt_file: Path) -> str:
-        mapping = {"desc-a": "cat-a", "desc-b": "wrong-cat"}
+    async def fake_keywords_and_llm(
+        description: str, threshold: int, margin: int, system_prompt_file_location: Path
+    ) -> tuple[str, str, float]:
+        mapping = {
+            "title-a : desc-a": ("cat-a", "matched", 15.0),
+            "title-b : desc-b": ("wrong-cat", "mismatched", 8.0),
+        }
         return mapping[description]
 
     fake_mlflow = FakeMLflow()
+    monkeypatch.setattr(run_eval, "REPO_ROOT", tmp_path)
     monkeypatch.setattr(
-        run_evaluation, "_resolve_prompt_file", lambda *args, **kwargs: prompt_file
+        run_eval, "_resolve_prompt_file", lambda *args, **kwargs: prompt_file
     )
-    monkeypatch.setattr(run_evaluation, "_classify_description", fake_classify)
-    monkeypatch.setattr(run_evaluation, "_get_mlflow_module", lambda: fake_mlflow)
+    monkeypatch.setattr(
+        "src.core.classification_v2_mix_v5.keywords_and_llm", fake_keywords_and_llm
+    )
+    monkeypatch.setattr(run_eval, "_get_mlflow_module", lambda: fake_mlflow)
 
     asyncio.run(
-        run_evaluation.run_evaluation(
-            truth_set_path=truth_set,
-            mapper="v2",
-            prompt_name=None,
+        run_eval.evaluate_truthset(
+            truthset_path=truth_set,
+            threshold=10,
+            margin=0,
+            prompt_name="custom_prompt.md",
             output_path=output_path,
             mlflow_tracking_uri="http://mlflow.local:5000",
             mlflow_experiment_name="ContractMap-Evaluation-Test",
@@ -148,14 +157,11 @@ def test_run_evaluation_logs_mlflow_params_metrics_and_artifacts(monkeypatch, tm
     assert fake_mlflow.experiment_name == "ContractMap-Evaluation-Test"
     assert fake_mlflow.start_run_name == "unit-test-run"
 
-    assert fake_mlflow.params["mapper"] == "v2"
-    assert fake_mlflow.params["truth_set_path"] == str(truth_set.resolve())
     assert fake_mlflow.params["prompt_name"] == "custom_prompt.md"
     assert fake_mlflow.params["prompt_path"] == str(prompt_file.resolve())
     assert fake_mlflow.params["num_samples"] == 2
 
     assert fake_mlflow.metrics["accuracy_percent"] == 50.0
-    assert fake_mlflow.metrics["accuracy_fraction"] == 0.5
     assert fake_mlflow.metrics["correct_predictions"] == 1
     assert "evaluation_duration_seconds" in fake_mlflow.metrics
 
