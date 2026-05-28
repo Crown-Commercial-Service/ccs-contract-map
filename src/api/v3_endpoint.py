@@ -57,7 +57,7 @@ class ContractDescription(BaseModel):
     description: str
 
 
-@app.post("/v1/map")
+@app.post("/v0.2.0/map")
 @cache(expire=3600)# will keep cache for 1 hour or 3600 seconds
 async def run_contract_mapper(body: ContractDescription):
     keyword_threshold = os.getenv("KEYWORD_THRESHOLD", 3)
