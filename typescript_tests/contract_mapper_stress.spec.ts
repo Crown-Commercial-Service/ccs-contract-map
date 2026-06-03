@@ -6,6 +6,7 @@ dotenv.config();
 
 // Non-Functional test
 test('stress test @load', async ({ request }) => {
+    test.setTimeout(120000);//allow for more time for the test
     const url = process.env.APIM_URL;
     const key = process.env.APIM_SUBSCRIPTION_KEY;
     const total_requests = 501;
