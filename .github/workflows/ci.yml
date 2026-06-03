@@ -72,11 +72,3 @@ jobs:
             # Pass github secret vault
             APIM_URL: ${{ secrets.APIM_URL }}
             APIM_SUBSCRIPTION_KEY: ${{ secrets.APIM_SUBSCRIPTION_KEY }}
-
-        - name: Upload Report
-          if: always()
-          uses: actions/upload-artifact@v4
-          with:
-            name: playwright-report
-            path: playwright-report/
-            retention-days: 30
