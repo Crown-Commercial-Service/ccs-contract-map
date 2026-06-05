@@ -1,32 +1,15 @@
 import { test, expect } from '@playwright/test';
-import dotenv from 'dotenv';
+import { postDescription } from './apiHelper';
 
-// Load the .env file
-dotenv.config();
 
 // Non-Functional test
 test('stress test @load', async ({ request }) => {
     test.setTimeout(120000);//allow for more time for the test
-    const url = process.env.APIM_URL;
-    const key = process.env.APIM_SUBSCRIPTION_KEY;
     const total_requests = 501;
-
-    if (!url || !key){
-         throw new Error("You need to input values in your .env file")
-        }
     console.log(" Sending ${total_requests} to APIM");
 
     const tasks = Array.from({ length: total_requests }).map(async (_, i) => {
-            return request.post(url, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Ocp-Apim-Subscription-Key': key
-                },
-                data: {
-                    description: `Stress test call #${i}`,
-//                     timestamp: new Date().toISOString()
-                }
-            });
+            return postDescription(request, `Test load ${i}`);
         });
     // fire all requests all at the same time
     const responses = await Promise.all(tasks);
@@ -47,9 +30,4 @@ test('stress test @load', async ({ request }) => {
     console.log("------------------------------------");
 
     expect(rateLimitedCount, 'Rate limit must triggered').toBeGreaterThan(0);
-
-    // run this code:  npx playwright test contract_mapper_functional.spec.ts --reporter=list
-
-
-
 });
