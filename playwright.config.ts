@@ -1,27 +1,36 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: './typescript_tests',
-  workers: 1,           // Essential for sequential order
+  workers: 1,
   fullyParallel: false,
+  timeout: 30000,
+  expect: { timeout: 5000 },
 
   projects: [
     {
       name: 'Accuracy-Phase',
       testMatch: /.*accuracy\.spec\.ts/,
+      timeout: 30000,
     },
     {
       name: 'Latency-Phase',
       testMatch: /.*latency\.spec\.ts/,
+      timeout: 10000,
     },
     {
       name: 'Load-Phase',
       testMatch: /.*stress\.spec\.ts/,
-      // Now Stress waits for Accuracy to finish
+      timeout: 120000,
       dependencies: ['Accuracy-Phase'],
+      retries: 1,
     },
   ],
-});
 
-// npx playwright test --workers=1
+  reporter: [
+    ['html'],
+    ['json', { outputFile: 'test-results/results.json' }],
+    ['junit', { outputFile: 'test-results/junit.xml' }],
+  ],
+});
 
