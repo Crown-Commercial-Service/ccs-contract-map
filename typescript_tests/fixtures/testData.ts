@@ -36,4 +36,8 @@ export const classificationCases = [
     description: 'Replacement CCTV servers',
     expected: 'Hardware',
   },
+  {
+    description: 'Contracted through RM6347 Vertical Application Solutions Crown Commercial Services Framework. This Direct Award is for the provision of continued support and necessary replatforming of the CROCTS and DS300 systems.',
+    expected: 'Software',
+  }
 ];
