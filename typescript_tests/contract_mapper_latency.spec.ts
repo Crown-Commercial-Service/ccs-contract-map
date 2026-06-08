@@ -1,20 +1,11 @@
 import { test, expect } from '@playwright/test';
-import dotenv from 'dotenv';
+import { postDescription } from './apiHelper';
 
-dotenv.config();
 // Non Functional
-test("Latency check: Response should not take longer than 5 seconds", async({request}) =>{
-    const url = process.env.APIM_URL;
-    const key = process.env.APIM_SUBSCRIPTION_KEY;
-
+test("Latency check: Response should not take longer than 5 seconds @latency", async({request}) =>{
     const start_time = Date.now();
 
-    const response = await request.post(
-        url, {
-            headers: { 'Ocp-Apim-Subscription-Key': key },
-            data: { description: "Laptops need updating" }
-            });
-
+    const response = await postDescription(request, "Test latency");
 
     const end_time = Date.now();
     const duration = end_time - start_time;
@@ -22,7 +13,4 @@ test("Latency check: Response should not take longer than 5 seconds", async({req
     expect(response.ok()).toBeTruthy();
 
     expect(duration).toBeLessThan(5000);
-
-
-
-    });
+});
