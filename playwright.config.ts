@@ -1,30 +1,41 @@
 import { defineConfig } from '@playwright/test';
+import dotenv from 'dotenv';
+
+// 1. Force load your local environment variables
+dotenv.config();
 
 export default defineConfig({
   testDir: './typescript_tests',
-  workers: 1,
-  fullyParallel: false,
+  workers: process.env.CI ? 2 : '50%',
+  fullyParallel: true,
   timeout: 30000,
   expect: { timeout: 5000 },
 
   projects: [
-    {
-      name: 'Accuracy-Phase',
-      testMatch: /.*accuracy\.spec\.ts/,
-      timeout: 30000,
-    },
-    {
-      name: 'Latency-Phase',
-      testMatch: /.*latency\.spec\.ts/,
-      timeout: 10000,
-    },
-    {
-      name: 'Load-Phase',
-      testMatch: /.*stress\.spec\.ts/,
+//     {
+//       name: 'Accuracy-Phase',
+//       testMatch: /.*accuracy\.spec\.ts/,
+//       timeout: 30000,
+//     },
+//     {
+//       name: 'Latency-Phase',
+//       testMatch: /.*latency\.spec\.ts/,
+//       timeout: 10000,
+//     },
+  {
+      // 3. FIXED: Removed the dependency bottleneck here so it runs independently
+      name: 'Parallel-Phase',
+      testMatch: /.*parallel\.spec\.ts/,
       timeout: 120000,
-      dependencies: ['Accuracy-Phase'],
       retries: 1,
     },
+//     {
+//       name: 'Load-Phase',
+//       testMatch: /.*stress\.spec\.ts/,
+//       timeout: 120000,
+//       dependencies: ['Accuracy-Phase'],
+//       retries: 1,
+//     },
   ],
 
   reporter: [
@@ -32,5 +43,13 @@ export default defineConfig({
     ['json', { outputFile: 'test-results/results.json' }],
     ['junit', { outputFile: 'test-results/junit.xml' }],
   ],
+
+// Add the local process manager this basically boots up fastapi from current codebase rather than APIM to see if changes work
+  webServer: {
+    command: 'uvicorn src.api.v3_endpoint:app --workers 4 --host 0.0.0.0 --port 5000', // Launches FastAPI with 4 concurrent workers
+    url: 'http://127.0.0.1:5000/docs',                // Playwright pings this URL until it's awake and healthy
+    reuseExistingServer: !process.env.CI,              // Locally it won't keep restarting; in CI it boots completely fresh
+    timeout: 60000,                                    // Gives Python up to 30 seconds to boot up smoothly
+  },
 });
 

@@ -11,10 +11,33 @@ class HeuristicClassifier:
         if registry_path is None:
             self.registry_path = path
         self.registry = self._load_registry()
+        #precompile
+        self.compiled_registry = self._precompile_registry()
 
     def _load_registry(self):
         with open(self.registry_path, "r", encoding="utf-8") as f:
             return json.load(f)
+
+    def _precompile_registry(self):
+        """This does the Regex and scoring once rather than doing after each iteration."""
+        compiled = {}
+        for category, keywords in self.registry.items():
+            primary_list = keywords[0]
+            secondary_list = keywords[1]
+
+            # Map strings to a tuple: (compiled_regex_object, points_to_award)
+            compiled_primary = []
+            for word in primary_list:
+                pattern = re.compile(rf"\b{re.escape(word.lower())}\b")
+                points = 50 if word.lower().startswith("rm") else 5
+                compiled_primary.append((pattern, points))
+
+            compiled_secondary = [
+                re.compile(rf"\b{re.escape(word.lower())}\b") for word in secondary_list
+            ]
+
+            compiled[category] = (compiled_primary, compiled_secondary)
+        return compiled
 
     def classify(self, description: str, threshold: int = 15, margin: int = 6):
         """
@@ -28,24 +51,18 @@ class HeuristicClassifier:
         desc_lower = description.lower()
         category_scores = {}
 
-        for category, keywords in self.registry.items():
-            primary_list = keywords[0]
-            secondary_list = keywords[1]
-
+        # Loop through our pre-compiled patterns instantly in-memory
+        for category, (primary_patterns, secondary_patterns) in self.compiled_registry.items():
             score = 0
 
-            # Check Primary Keywords (High Signal)
-            for word in primary_list:
-                # \b ensures we match exact words only
-                if re.search(rf"\b{re.escape(word.lower())}\b", desc_lower):
-                    if word.lower().startswith("rm"):
-                        score += 50  # Instant win
-                    else:
-                        score += 5
+            # Check Pre-compiled Primary Keywords
+            for pattern, points in primary_patterns:
+                if pattern.search(desc_lower):
+                    score += points
 
-            # Check Secondary Keywords (Supporting Context)
-            for word in secondary_list:
-                if re.search(rf"\b{re.escape(word.lower())}\b", desc_lower):
+            # Check Pre-compiled Secondary Keywords
+            for pattern in secondary_patterns:
+                if pattern.search(desc_lower):
                     score += 1
 
             category_scores[category] = score
@@ -78,16 +95,7 @@ class HeuristicClassifier:
 
         return best_cat, best_score
 
-        # # Find the category with the highest score
-        # best_category = max(category_scores, key=category_scores.get)
-        # max_score = category_scores[best_category]
-        # print(max_score)
-        #
-        # # Only return a match if it meets your confidence threshold
-        # if max_score >= threshold:
-        #     return best_category, max_score
-        #
-        # return None, max_score
+
 
 
 # # --- Example Usage ---
