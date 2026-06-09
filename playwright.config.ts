@@ -30,7 +30,6 @@ export default defineConfig({
       testMatch: /.*parallel\.spec\.ts/,
       timeout: 120000,
       retries: 1,
-      dependencies: ['Latency-Phase'],
     },
 //     {
 //       name: 'Load-Phase',
