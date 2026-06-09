@@ -75,5 +75,5 @@ async def run_contract_mapper(body: ContractDescription):
         # Raise an HTTPException so FastAPI returns a 500 status code
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An internal error occurred while processing the contract mapping.",
+            detail=f"An internal error occurred while processing the contract mapping {len(os.getenv("AZURE_OPENAI_API_VERSION"))}.",
         )
