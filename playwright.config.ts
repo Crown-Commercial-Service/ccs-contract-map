@@ -7,7 +7,7 @@ dotenv.config();
 export default defineConfig({
   testDir: './typescript_tests',
   workers: process.env.CI ? 2 : '50%',
-  fullyParallel: true,
+  fullyParallel: false,
   timeout: 30000,
   expect: { timeout: 30000 },
 
