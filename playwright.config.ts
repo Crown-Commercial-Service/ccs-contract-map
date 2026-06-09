@@ -12,26 +12,26 @@ export default defineConfig({
   expect: { timeout: 30000 },
 
   projects: [
-    {
-      name: 'Accuracy-Phase',
-      testMatch: /.*accuracy\.spec\.ts/,
-      timeout: 120000,
-      retries: 1,
-    },
 //     {
+//       name: 'Accuracy-Phase',
+//       testMatch: /.*accuracy\.spec\.ts/,
+//       timeout: 120000,
+//       retries: 1,
+//     },
+// //     {
 //       name: 'Latency-Phase',
 //       testMatch: /.*latency\.spec\.ts/,
 //       timeout: 120000,
 //       retries: 1,
 //       dependencies: ['Accuracy-Phase'],
 //     },
-//   {
-//       name: 'Parallel-Phase',
-//       testMatch: /.*parallel\.spec\.ts/,
-//       timeout: 120000,
-//       retries: 1,
-//       dependencies: ['Latency-Phase'],
-//     },
+  {
+      name: 'Parallel-Phase',
+      testMatch: /.*parallel\.spec\.ts/,
+      timeout: 120000,
+      retries: 1,
+      dependencies: ['Latency-Phase'],
+    },
 //     {
 //       name: 'Load-Phase',
 //       testMatch: /.*stress\.spec\.ts/,
