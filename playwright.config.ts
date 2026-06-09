@@ -23,12 +23,14 @@ export default defineConfig({
       testMatch: /.*latency\.spec\.ts/,
       timeout: 120000,
       retries: 1,
+      dependencies: ['Accuracy-Phase'],
     },
   {
       name: 'Parallel-Phase',
       testMatch: /.*parallel\.spec\.ts/,
       timeout: 120000,
       retries: 1,
+      dependencies: ['Latency-Phase'],
     },
 //     {
 //       name: 'Load-Phase',
