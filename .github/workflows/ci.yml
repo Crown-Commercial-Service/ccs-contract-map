@@ -90,6 +90,9 @@ jobs:
         - name: Install Playwright Browsers
           run: npx playwright install --with-deps
 
+        - name: Create empty .env file to satisfy background loaders
+          run: touch .env
+
         - name: Run Playwright tests
           run: npx playwright test
 
