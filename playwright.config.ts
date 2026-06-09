@@ -10,14 +10,16 @@ export default defineConfig({
   fullyParallel: false,
   timeout: 30000,
   expect: { timeout: 30000 },
-
+    use: {
+        baseURL: process.env.API_URL || 'http://127.0.0.1:5000',
+      },
   projects: [
-//     {
-//       name: 'Accuracy-Phase',
-//       testMatch: /.*accuracy\.spec\.ts/,
-//       timeout: 120000,
-//       retries: 1,
-//     },
+    {
+      name: 'Accuracy-Phase',
+      testMatch: /.*accuracy\.spec\.ts/,
+      timeout: 120000,
+      retries: 1,
+    },
     {
       name: 'Latency-Phase',
       testMatch: /.*latency\.spec\.ts/,
