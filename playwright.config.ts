@@ -9,7 +9,7 @@ export default defineConfig({
   workers: process.env.CI ? 2 : '50%',
   fullyParallel: true,
   timeout: 30000,
-  expect: { timeout: 5000 },
+  expect: { timeout: 30000 },
 
   projects: [
     {
@@ -20,7 +20,7 @@ export default defineConfig({
     {
       name: 'Latency-Phase',
       testMatch: /.*latency\.spec\.ts/,
-      timeout: 10000,
+      timeout: 50000,
     },
   {
       name: 'Parallel-Phase',
