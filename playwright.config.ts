@@ -1,8 +1,14 @@
 import { defineConfig } from '@playwright/test';
 import dotenv from 'dotenv';
+import fs from 'fs';
 
-// 1. Force load your local environment variables
-dotenv.config();
+// 🌟 ONLY load the physical .env file if we are NOT in CI and the file actually exists
+if (!process.env.CI && fs.existsSync('.env')) {
+  dotenv.config();
+  console.log('📝 Loaded configuration from local .env file');
+} else {
+  console.log('🚀 Running in CI mode: Utilizing GitHub native environment variables');
+}
 
 export default defineConfig({
   testDir: './typescript_tests',
