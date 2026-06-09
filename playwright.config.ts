@@ -58,6 +58,15 @@ export default defineConfig({
     url: 'http://127.0.0.1:5000/docs',                // Playwright pings this URL until it's awake and healthy
     reuseExistingServer: !process.env.CI,              // Locally it won't keep restarting; in CI it boots completely fresh
     timeout: 60000,                                    // Gives Python up to 30 seconds to boot up smoothly
+    env: {
+          KEYWORD_THRESHOLD: process.env.KEYWORD_THRESHOLD || '3',
+          KEYWORD_MARGIN: process.env.KEYWORD_MARGIN || '5',
+          AZURE_OPENAI_ENDPOINT: process.env.AZURE_OPENAI_ENDPOINT || '',
+          AZURE_OPENAI_KEY: process.env.AZURE_OPENAI_KEY || '',
+          DEPLOYMENT_NAME: process.env.DEPLOYMENT_NAME || '',
+          AZURE_OPENAI_API_VERSION: process.env.AZURE_OPENAI_API_VERSION || '',
+
+        }
   },
 });
 
