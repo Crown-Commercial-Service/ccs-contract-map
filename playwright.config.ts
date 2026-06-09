@@ -12,18 +12,17 @@ export default defineConfig({
   expect: { timeout: 5000 },
 
   projects: [
-//     {
-//       name: 'Accuracy-Phase',
-//       testMatch: /.*accuracy\.spec\.ts/,
-//       timeout: 30000,
-//     },
-//     {
-//       name: 'Latency-Phase',
-//       testMatch: /.*latency\.spec\.ts/,
-//       timeout: 10000,
-//     },
+    {
+      name: 'Accuracy-Phase',
+      testMatch: /.*accuracy\.spec\.ts/,
+      timeout: 30000,
+    },
+    {
+      name: 'Latency-Phase',
+      testMatch: /.*latency\.spec\.ts/,
+      timeout: 10000,
+    },
   {
-      // 3. FIXED: Removed the dependency bottleneck here so it runs independently
       name: 'Parallel-Phase',
       testMatch: /.*parallel\.spec\.ts/,
       timeout: 120000,
