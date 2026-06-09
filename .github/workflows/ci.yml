@@ -51,6 +51,13 @@ jobs:
       runs-on: ubuntu-latest
       # Wait for the backend tests to pass first to save resources
       needs: pytest
+      env:
+        KEYWORD_THRESHOLD: 3
+        KEYWORD_MARGIN: 5
+        AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+        AZURE_OPENAI_KEY: ${{ secrets.AZURE_OPENAI_KEY }}
+        DEPLOYMENT_NAME: ${{ secrets.DEPLOYMENT_NAME }}
+        AZURE_OPENAI_API_VERSION: ${{ secrets.AZURE_OPENAI_API_VERSION }}
       steps:
         - uses: actions/checkout@v4
           # set up python within node container so that it can run fastapi for local tests
@@ -85,11 +92,4 @@ jobs:
 
         - name: Run Playwright tests
           run: npx playwright test
-          env:
-            KEYWORD_THRESHOLD: 3
-            KEYWORD_MARGIN: 5
-            # Pass github secret vault
-            AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
-            AZURE_OPENAI_KEY: ${{ secrets.AZURE_OPENAI_KEY }}
-            DEPLOYMENT_NAME: ${{ secrets.DEPLOYMENT_NAME }}
-            AZURE_OPENAI_API_VERSION: ${{ secrets.AZURE_OPENAI_API_VERSION }}
+
