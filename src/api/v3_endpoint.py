@@ -71,16 +71,11 @@ async def run_contract_mapper(body: ContractDescription):
         return {"AI_label": response}
     except Exception as e:
         print(f"Internal Server Error: {e}")
-        endpoint_len = len(os.getenv("AZURE_OPENAI_ENDPOINT", ""))
-        key_len = len(os.getenv("AZURE_OPENAI_KEY", ""))
-        version_len = len(os.getenv("AZURE_OPENAI_API_VERSION", ""))
 
         # Raise an HTTPException so FastAPI returns a 500 status code
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=(
                 f"Error: {str(e)}. "
-                f"Env Check -> Endpoint Len: {endpoint_len}, "
-                f"Key Len: {key_len}, Version Len: {version_len}"
             )
         )
