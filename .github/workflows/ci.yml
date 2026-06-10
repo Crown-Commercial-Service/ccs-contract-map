@@ -1,9 +1,9 @@
 name: CI
 
 on:
-  pull_request:
+  push:
     branches:
-      - "**"
+      - "typescript_tests_update_apim"
 
 # This allows GitHub to request the secure passwordless login token from Azure
 permissions:
