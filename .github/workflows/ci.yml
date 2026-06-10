@@ -75,7 +75,7 @@ jobs:
 
       - name: Generate OpenAPI Schema from FastAPI
         run: |
-          python generate_latest_api_json.py
+          python -m generate_latest_api_json
 
       - name: Azure Login (OIDC Passwordless)
         uses: azure/login@v2
