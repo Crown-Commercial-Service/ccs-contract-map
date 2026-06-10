@@ -96,7 +96,7 @@ jobs:
           az apim api import \
             --resource-group "AzD-UKS-AI" \
             --service-name "azd-contract-mapping-apim-dev" \
-            --api-id "contractmap_dev_env" \
+            --api-id "contractmap_dev_env-api" \
             --path "/contractmap_dev_env" \
             --specification-format "OpenApiJson" \
             --specification-path "output/openapi.json" \
