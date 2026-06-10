@@ -20,10 +20,12 @@ def clean_fastapi_openapi_json(raw_json):
         # 3. Handle Paths and Operations
         if "paths" in spec:
             for path_item in spec["paths"].values():
-                if not isinstance(path_item, dict): continue
+                if not isinstance(path_item, dict):
+                    continue
 
                 for operation in path_item.values():
-                    if not isinstance(operation, dict): continue
+                    if not isinstance(operation, dict):
+                        continue
 
                     # ADDED: Fix 'examples' (plural) to 'example' (singular) for APIM 3.0.1
                     # APIM 3.0.1 will fail if it sees the 3.1.0 'examples' array
