@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - "typescript_tests_update_apim"
+      - "**"
 
 # This allows GitHub to request the secure passwordless login token from Azure
 permissions:
@@ -74,10 +74,12 @@ jobs:
           python -m pip install -e .
 
       - name: Generate OpenAPI Schema from FastAPI
+        if: github.ref_name == 'develop' || github.ref_name == 'typescript_tests_update_apim' || github.ref_name == 'typescript_tests'
         run: |
           python -m generate_latest_api_json
 
       - name: Azure Login (OIDC Passwordless)
+        if: github.ref_name == 'develop'
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -85,6 +87,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Deploy Latest FastAPI Code to App Service
+        if: github.ref_name == 'develop' || github.ref_name == 'typescript_tests_update_apim' || github.ref_name == 'typescript_tests'
         uses: azure/webapps-deploy@v3
         with:
           app-name: "AzD-contract-mapping-2328"   # <-- Replace with your Azure Web App name
@@ -92,6 +95,7 @@ jobs:
 
 
       - name: Update Azure APIM API Spec
+        if: github.ref_name == 'develop' || github.ref_name == 'typescript_tests_update_apim' || github.ref_name == 'typescript_tests'
         run: |
           az apim api import \
             --resource-group "AzD-UKS-AI" \
