@@ -79,7 +79,7 @@ jobs:
           python -m generate_latest_api_json
 
       - name: Azure Login (OIDC Passwordless)
-        if: github.ref_name == 'develop'
+        if: github.ref_name == 'develop'|| github.ref_name == 'typescript_tests_update_apim' || github.ref_name == 'typescript_tests'
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
