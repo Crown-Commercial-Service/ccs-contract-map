@@ -57,7 +57,7 @@ class ContractDescription(BaseModel):
     description: str
 
 
-@app.post("/v1/map")
+@app.post("/v0.2.0/map")
 @cache(expire=3600)# will keep cache for 1 hour or 3600 seconds
 async def run_contract_mapper(body: ContractDescription):
     keyword_threshold = os.getenv("KEYWORD_THRESHOLD", 3)
@@ -75,5 +75,7 @@ async def run_contract_mapper(body: ContractDescription):
         # Raise an HTTPException so FastAPI returns a 500 status code
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An internal error occurred while processing the contract mapping.",
+            detail=(
+                f"Error: {str(e)}. "
+            )
         )

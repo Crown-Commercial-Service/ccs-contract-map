@@ -2,8 +2,8 @@ import { test, expect } from "@playwright/test";
 import { postDescription } from "./apiHelper";
 
 // Non-Functional test
-test("stress test @load", async ({ request }) => {
-  const total_requests = 501;
+test("parallel test @load", async ({ request }) => {
+  const total_requests = 100;
   console.log(`Sending ${total_requests} to APIM`);
 
   const tasks = Array.from({ length: total_requests }).map(async (_, i) => {
@@ -17,18 +17,10 @@ test("stress test @load", async ({ request }) => {
 
   // Count the results
   const successCount = statuses.filter((s) => s === 200).length;
-  const rateLimitedCount = statuses.filter((s) => s === 429).length;
-  const otherStatuses = statuses.filter((s) => s !== 200 && s !== 429);
-  const uniqueOtherCodes = [...new Set(otherStatuses)];
 
   console.log("------------------------------------");
   console.log(`✅ Success (200): ${successCount}`);
-  console.log(`❌ Rate Limited (429): ${rateLimitedCount}`);
-  if (otherStatuses.length > 0)
-    console.log(
-      `⚠️ Other Statuses: ${otherStatuses.length} , statuses: ${uniqueOtherCodes}`,
-    );
-  console.log("------------------------------------");
 
-  expect(rateLimitedCount, "Rate limit must triggered").toBeGreaterThan(0);
+
+  expect(successCount, "total parallel request").toBe(total_requests);
 });

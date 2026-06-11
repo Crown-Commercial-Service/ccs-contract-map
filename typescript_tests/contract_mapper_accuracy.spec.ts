@@ -13,5 +13,5 @@ test("checking if model produces expected output @accuracy", async ({ request })
         const actual = body.AI_label;
         console.log(`Description: ${description} => AI Label: ${actual}`, 'Status code: ', response.status());
         expect(body.AI_label, "The AI labels should match the expected categories in order and be correct").toBe(expected);
-    }       
+    }
 });

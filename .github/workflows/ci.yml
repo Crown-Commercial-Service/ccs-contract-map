@@ -5,6 +5,11 @@ on:
     branches:
       - "**"
 
+# This allows GitHub to request the secure passwordless login token from Azure
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -47,28 +52,98 @@ jobs:
 
       - name: Run tests
         run: pytest -q
+
   playwright-tests:
-      runs-on: ubuntu-latest
-      # Wait for the backend tests to pass first to save resources
-      needs: pytest
-      steps:
-        - uses: actions/checkout@v4
+    runs-on: ubuntu-latest
+    # Wait for the backend tests to pass first to save resources
+    needs: pytest
+    steps:
+      - uses: actions/checkout@v4
 
-        - name: Set up Node.js
-          uses: actions/setup-node@v4
-          with:
-            node-version: lts/*
-            cache: 'npm'
+      # ---- START: APIM GENERATION & UPDATE STEPS ----
+      - name: Set up Python (for FastAPI schema extraction)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
 
-        - name: Install dependencies
-          run: npm install
+      - name: Install Python dependencies (for FastAPI schema extraction)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e .
 
-        - name: Install Playwright Browsers
-          run: npx playwright install --with-deps
+      - name: Generate OpenAPI Schema from FastAPI
+        if: github.ref_name == 'develop' || github.ref_name == 'typescript_tests_update_apim' || github.ref_name == 'typescript_tests'
+        run: |
+          python -m generate_latest_api_json
 
-        - name: Run Playwright tests
-          run: npx playwright test
-          env:
-            # Pass github secret vault
-            APIM_URL: ${{ secrets.APIM_URL }}
-            APIM_SUBSCRIPTION_KEY: ${{ secrets.APIM_SUBSCRIPTION_KEY }}
+      - name: Azure Login (OIDC Passwordless)
+        if: github.ref_name == 'develop'|| github.ref_name == 'typescript_tests_update_apim' || github.ref_name == 'typescript_tests'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy Latest FastAPI Code to App Service
+        if: github.ref_name == 'develop' || github.ref_name == 'typescript_tests_update_apim' || github.ref_name == 'typescript_tests'
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: "AzD-contract-mapping-2328"   # <-- Replace with your Azure Web App name
+          package: "."                        # Push your current repository directory
+
+
+      - name: Update Azure APIM API Spec
+        if: github.ref_name == 'develop' || github.ref_name == 'typescript_tests_update_apim' || github.ref_name == 'typescript_tests'
+        run: |
+          az apim api import \
+            --resource-group "AzD-UKS-AI" \
+            --service-name "azd-contract-mapping-apim-dev" \
+            --api-id "contractmap_dev_env-api" \
+            --path "/contractmap_dev_env" \
+            --specification-format "OpenApiJson" \
+            --specification-path "output/openapi.json" \
+            --protocols "https"
+
+      - name: Wait for App Service to be healthy
+        if: github.ref_name == 'develop' || github.ref_name == 'typescript_tests_update_apim' || github.ref_name == 'typescript_tests'
+        env:
+          APIM_URL: ${{ secrets.APIM_URL }}
+          APIM_SUBSCRIPTION_KEY: ${{ secrets.APIM_SUBSCRIPTION_KEY }}
+        run: |
+          echo "Waiting for App Service to serve new deployment..."
+          for i in {1..20}; do
+            status=$(curl -s -o /dev/null -w "%{http_code}" \
+              -X POST "$APIM_URL" \
+              -H "Ocp-Apim-Subscription-Key: $APIM_SUBSCRIPTION_KEY" \
+              -H "Content-Type: application/json" \
+              -d '{"description": "health check"}')
+            echo "Attempt $i: HTTP $status"
+            if [ "$status" = "200" ]; then
+              echo "App Service is healthy."
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "App Service did not become healthy in time."
+          exit 1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        run: npx playwright test
+        env:
+          # Pass github secret vault
+          APIM_URL: ${{ secrets.APIM_URL }}
+          APIM_SUBSCRIPTION_KEY: ${{ secrets.APIM_SUBSCRIPTION_KEY }}

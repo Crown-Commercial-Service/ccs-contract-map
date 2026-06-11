@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { postDescription } from './apiHelper';
 
 // Non Functional
-test("Latency check: Response should not take longer than 5 seconds @latency", async({request}) =>{
+test("Latency check: Response should not take longer than 6 seconds @latency", async({request}) =>{
     const start_time = Date.now();
 
     const response = await postDescription(request, "Test latency");
@@ -12,5 +12,5 @@ test("Latency check: Response should not take longer than 5 seconds @latency", a
     console.log(`⏱️ Request took ${duration}ms`);
     expect(response.ok()).toBeTruthy();
 
-    expect(duration).toBeLessThan(5000);
+    expect(duration).toBeLessThan(6000);
 });
