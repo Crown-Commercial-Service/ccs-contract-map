@@ -4,7 +4,7 @@ import { postDescription } from "./apiHelper";
 // Non-Functional test
 test("stress test @load", async ({ request }) => {
   const total_requests = 501;
-  console.log(" Sending ${total_requests} to APIM");
+  console.log(`Sending ${total_requests} to APIM`);
 
   const tasks = Array.from({ length: total_requests }).map(async (_, i) => {
     return postDescription(request, `Test load ${i}`);

@@ -105,7 +105,29 @@ jobs:
             --specification-format "OpenApiJson" \
             --specification-path "output/openapi.json" \
             --protocols "https"
-    
+
+      - name: Wait for App Service to be healthy
+        if: github.ref_name == 'develop' || github.ref_name == 'typescript_tests_update_apim' || github.ref_name == 'typescript_tests'
+        env:
+          APIM_URL: ${{ secrets.APIM_URL }}
+          APIM_SUBSCRIPTION_KEY: ${{ secrets.APIM_SUBSCRIPTION_KEY }}
+        run: |
+          echo "Waiting for App Service to serve new deployment..."
+          for i in {1..20}; do
+            status=$(curl -s -o /dev/null -w "%{http_code}" \
+              -X POST "$APIM_URL" \
+              -H "Ocp-Apim-Subscription-Key: $APIM_SUBSCRIPTION_KEY" \
+              -H "Content-Type: application/json" \
+              -d '{"description": "health check"}')
+            echo "Attempt $i: HTTP $status"
+            if [ "$status" = "200" ]; then
+              echo "App Service is healthy."
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "App Service did not become healthy in time."
+          exit 1
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
