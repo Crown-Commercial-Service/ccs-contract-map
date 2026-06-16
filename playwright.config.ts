@@ -28,6 +28,11 @@ export default defineConfig({
       dependencies: ['Accuracy-Phase'],
       retries: 1,
     },
+    {
+      name: 'ErrorScenarios-Phase',
+      testMatch: /.*error_scenarios\.spec\.ts/,
+      timeout: 30000,
+    },
   ],
   reporter: [
     ['html'],
