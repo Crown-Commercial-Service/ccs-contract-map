@@ -13,6 +13,7 @@ from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.backends.inmemory import InMemoryBackend  # Added for fallback
 from fastapi_cache.decorator import cache
 import os
+import logging
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -51,7 +52,7 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
-
+logger = logging.getLogger("api_logger")
 
 class ContractDescription(BaseModel):
     description: str
@@ -60,17 +61,35 @@ class ContractDescription(BaseModel):
 @app.post("/v0.2.0/map")
 @cache(expire=3600)# will keep cache for 1 hour or 3600 seconds
 async def run_contract_mapper(body: ContractDescription):
-    keyword_threshold = os.getenv("KEYWORD_THRESHOLD", 3)
-    keyword_margin = os.getenv("KEYWORD_MARGIN", 5)
+    # check if the threshold hold types are always int
+    try:
+        keyword_threshold = int(os.getenv("KEYWORD_THRESHOLD", 3))
+        keyword_margin = int(os.getenv("KEYWORD_MARGIN", 5))
+    except ValueError as env_var_error:
+        logger.critical(f"Server Configuration Error: Invalid integer for environement variabels: {env_var_error}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server configuration error."
+        )
+
+
+    clean_description = (body.description or "").strip()
+    print(type(clean_description))
+    if not clean_description:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Empty description Outside Taxonomy."
+        )
 
     try:
+
         response, _, _ = await keywords_and_llm(
-            description=body.description, threshold=int(keyword_threshold), margin=int(keyword_margin)
+            description=clean_description, threshold=keyword_threshold, margin=keyword_margin
         )
-        print(response)
+        logger.info(response)
         return {"AI_label": response}
     except Exception as e:
-        print(f"Internal Server Error: {e}")
+        logger.error(f"Internal Server Error during contract mapping : {e}", exc_info=True)
 
         # Raise an HTTPException so FastAPI returns a 500 status code
         raise HTTPException(
