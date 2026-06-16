@@ -125,8 +125,15 @@ python -m pip install -r requirements.txt
 python -m pip install -e .
 ```
 
-2. Set up Azure MLflow environment variables in `.env`:
+2. Set up environment variables in `.env`:
 ```bash
+# Azure OpenAI (required for keyword extraction and LLM classification)
+AZURE_OPENAI_ENDPOINT=https://<your-resource>.openai.azure.com/
+AZURE_OPENAI_KEY=<your-api-key>
+DEPLOYMENT_NAME=<your-deployment-name>
+AZURE_OPENAI_API_VERSION=2024-02-01
+
+# Azure MLflow (required for evaluation tracking)
 MLFLOW_TRACKING_URI=azureml://...
 MLFLOW_EXPERIMENT_NAME=ContractMap-Evaluation
 ```
@@ -326,7 +333,7 @@ new_AI_results_for_Jasmine.xlsx
 
 Ensure you have:
 1. DVC installed (included in `requirements.txt`)
-2. Azure MLflow configured (`.env` file with `MLFLOW_TRACKING_URI`)
+2. Environment variables configured in `.env` (see [Prerequisites](#prerequisites) above — Azure OpenAI is required for keyword extraction; Azure MLflow is required for evaluation tracking)
 3. Authenticated with Azure: `az login`
 
 ### Running the Full Pipeline
@@ -371,11 +378,12 @@ All pipeline parameters are centralized in `params.yaml`:
 ```yaml
 # Data Processing
 data:
-  input_excel: "new_AI_results_for_Jasmine.xlsx"
-  train_tsv: "new_AI_results_for_Jasmine_train.tsv"
-  test_tsv: "new_AI_results_for_Jasmine_test.tsv"
+  input_excel: "data/input/evaluation_data.xlsx"
+  train_tsv: "data/input/evaluation_data_train.tsv"
+  test_tsv: "data/input/evaluation_data_test.tsv"
   train_split_ratio: 0.8
   semantic_anchors_json: "semantic_anchors2.json"
+  RMnumber_framework_mapping: "data/input/GCA_RMnumber_framework_mapping.csv"  # CSV mapping RM/framework numbers to categories
 
 # Grid Search Parameters
 gridsearch:
@@ -475,18 +483,20 @@ If you prefer to run stages manually without DVC:
 ```bash
 # 1. Process data
 python src/utils/process_truthset.py \
-  --input new_AI_results_for_Jasmine.xlsx \
+  --input data/input/evaluation_data.xlsx \
   --train-ratio 0.8
 
 # 2. Extract keywords
 python src/utils/semantic_anchors_tool.py \
-  --input-train-tsv new_AI_results_for_Jasmine_train.tsv \
-  --output-json semantic_anchors2.json
+  --input-train-tsv data/input/evaluation_data_train.tsv \
+  --output-json semantic_anchors2.json \
+  --rm-mapping-csv data/input/GCA_RMnumber_framework_mapping.csv \
+  --max-categories 3  # optional: max categories a word can appear in before being filtered (default: 3)
 
 # 3. Run grid search
 python eval/run_gridsearch.py \
   --params-file params.yaml \
-  --truthset new_AI_results_for_Jasmine.xlsx
+  --truthset data/input/evaluation_data.xlsx
 
 # 4. Visualize results
 python eval/visualise_experiments.py \
