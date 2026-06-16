@@ -1,7 +1,5 @@
 .env
 venv/*
-*.csv
-*.xlsx
 **/__pycache__
 **egg-info
 *.DS_Store
@@ -14,12 +12,7 @@ nhs_data_evaluation.py
 tenders_experiment.ipynb
 
 # DVC
-/data/results/*.csv
-/data/results/*.json
-/data/results/optimization_complete.txt
-/data/results/optimization_surface.png
-/new_AI_results_for_Jasmine_train.tsv
-/new_AI_results_for_Jasmine_test.tsv
+/data/results/*
 
 # Playwright test artifacts
 /test-results
