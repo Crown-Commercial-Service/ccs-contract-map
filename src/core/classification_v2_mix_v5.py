@@ -1,6 +1,6 @@
 from src.core.classification_v2 import contract_mapper_v2
 from src.core.classification_v5 import HeuristicClassifier
-
+from fastapi.concurrency import run_in_threadpool
 
 GLOBAL_CLASSIFIER = HeuristicClassifier()
 
@@ -8,8 +8,11 @@ GLOBAL_CLASSIFIER = HeuristicClassifier()
 async def keywords_and_llm(
     description: str, threshold: int, margin: int, system_prompt_file_location=None
 ):
-    result, score = GLOBAL_CLASSIFIER.classify(
-        description, threshold=threshold, margin=margin
+    result, score = await run_in_threadpool(
+        GLOBAL_CLASSIFIER.classify,
+        description,
+        threshold=threshold,
+        margin=margin
     )
 
     # 2. Check the result

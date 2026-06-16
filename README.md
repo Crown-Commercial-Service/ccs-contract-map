@@ -30,29 +30,6 @@ ccs-contract-map/
 └── tests/                        # Unit tests
 ```
 
-## Features
-
-- Uses a gpt-4.1-mini LLM for classification
-- There are 2 LLM architectures: Version 1 (in `src/core/classification_v1.py`) and Version 2 (in `src/core/classification_v2.py`)
-- Version 1 uses role‑tagged messages (SystemMessage + HumanMessage) so instructions are treated as high‑priority and
-protected from user input, whereas Version 2 sends one raw string with specified newlines that mixes instructions with content.
-- The LLM ran on 74 descriptions: Version 1 got accuracy of 87.67123287671232% and
-Version 2 got accuracy 89.04109589041096%. However, Version 1
-is safer because it uses a SystemMessage that separates instructions from user input,
-so the model treats those instructions as higher priority and they are harder for user text to override.
-This reduces the risk of prompt‑injection.
-
-Note: According to Microsoft, it is not possible to obtain 100% deterministic
-results from LLMs. When you repeat an experiment, the model’s outputs
-can vary by a few percentage points. This variability occurs because many queries are subjective
-or admit multiple valid answers, so the model may produce different responses on different runs.
-Setting temperature to 0 reduces randomness but does not guarantee identical outputs. For more information, see:
-https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/reproducible-output?tabs=pyton
-
-recent experiment of LLM version 2 system prompt vs system prompt version 2 can be seen:
-here: https://docs.google.com/document/d/1faUwE-W7Eh3n6qg4sblHMjMtkmziJCG9/edit#heading=h.vigkhlj1brjf
-The experiment was ran using `evaluation/run_demo_v2.py`
-
 ## How It Works
 
 Contractmap is a hybrid keyword + LLM system. When a contract description is passed in, the following happens:
@@ -61,6 +38,10 @@ Contractmap is a hybrid keyword + LLM system. When a contract description is pas
 Once this process finishes, the system returns a single CCS category name.
 
 ## How To Install Locally
+
+### Python
+
+The system and its unit tests are all written in python. To install it, first ensure that Python is installed on your system, and then follow these steps:
 
 1. Create a venv:
 ```
@@ -79,13 +60,21 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-## Developer Tooling (Pre-commit, Ruff, pytest)
+### TypeScript
+
+Functional tests are written in TypeScript and run through Playwright. To install the TypeScript environment, first ensure that node.js is installed on your system, and then run:
+```
+npm install
+```
+
+## Developer Tooling (Pre-commit, Ruff, pytest, playwright)
 
 This project uses:
 
 - [pre-commit](https://pre-commit.com/) for running checks automatically before each commit.
 - [Ruff](https://docs.astral.sh/ruff/) for fast linting.
 - [pytest](https://docs.pytest.org/) for unit testing.
+- [playwright](https://playwright.dev/) for functional testing.
 
 ### Set up pre-commit hooks
 
@@ -101,7 +90,7 @@ Run all hooks manually across the repository:
 pre-commit run --all-files
 ```
 
-### Run Ruff and pytest manually
+### Run Ruff and tests manually
 
 Run Ruff:
 
@@ -109,10 +98,16 @@ Run Ruff:
 ruff check .
 ```
 
-Run tests:
+Run unit tests:
 
 ```bash
 pytest -q
+```
+
+Run functional tests:
+
+```bash
+npx playwright test
 ```
 
 ## Evaluation
