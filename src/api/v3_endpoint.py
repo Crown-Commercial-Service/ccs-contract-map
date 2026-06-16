@@ -66,7 +66,7 @@ async def run_contract_mapper(body: ContractDescription):
         keyword_threshold = int(os.getenv("KEYWORD_THRESHOLD", 3))
         keyword_margin = int(os.getenv("KEYWORD_MARGIN", 5))
     except ValueError as env_var_error:
-        logger.critical(f"Server Configuration Error: Invalid integer for environement variabels: {env_var_error}")
+        logger.critical(f"Server Configuration Error: Invalid integer for environment variables: {env_var_error}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server configuration error."
@@ -78,7 +78,7 @@ async def run_contract_mapper(body: ContractDescription):
     if not clean_description:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Empty description Outside Taxonomy."
+            detail="Empty Description detected Outside Taxonomy."
         )
 
     try:
