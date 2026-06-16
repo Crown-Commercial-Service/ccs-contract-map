@@ -2,11 +2,12 @@
 
 # Data Processing
 data:
-  input_excel: "new_AI_results_for_Jasmine.xlsx"
-  train_tsv: "new_AI_results_for_Jasmine_train.tsv"
-  test_tsv: "new_AI_results_for_Jasmine_test.tsv"
+  input_excel: "data/input/evaluation_data.xlsx"
+  train_tsv: "data/input/evaluation_data_train.tsv"
+  test_tsv: "data/input/evaluation_data_test.tsv"
   train_split_ratio: 0.8
   semantic_anchors_json: "semantic_anchors.json"
+  RMnumber_framework_mapping: "data/input/GCA_RMnumber_framework_mapping.csv"
 
 # Grid Search Parameters
 gridsearch:
