@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "types": ["node", "@playwright/test"],
+    "lib": ["ES2020", "DOM"]
+  },
+  "include": ["playwright.config.ts", "typescript_tests/**/*.ts"],
+  "exclude": ["node_modules"]
+}

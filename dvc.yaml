@@ -29,9 +29,11 @@ stages:
       python src/utils/semantic_anchors_tool.py
       --input-train-tsv ${data.train_tsv}
       --output-json ${data.semantic_anchors_json}
+      --rm-mapping-csv ${data.RMnumber_framework_mapping}
     deps:
       - src/utils/semantic_anchors_tool.py
       - ${data.train_tsv}
+      - ${data.RMnumber_framework_mapping}
     params:
       - data.train_tsv
       - data.semantic_anchors_json
