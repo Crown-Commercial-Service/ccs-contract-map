@@ -74,11 +74,11 @@ async def run_contract_mapper(body: ContractDescription):
 
 
     clean_description = (body.description or "").strip()
-    print(type(clean_description))
+
     if not clean_description:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Empty Description detected Outside Taxonomy."
+            detail="Empty Description detected"
         )
 
     try:
