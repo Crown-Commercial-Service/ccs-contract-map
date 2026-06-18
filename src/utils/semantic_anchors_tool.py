@@ -18,7 +18,10 @@ def extract_description(val):
 
 
 def build_semantic_anchors(
-    corpus_path: Path, output_path: Path, max_categories: int = 3
+    corpus_path: Path,
+    output_path: Path,
+    max_categories: int = 3,
+    rm_mapping_path: Path | None = None,
 ) -> dict:
     """
     Build semantic anchors registry from training corpus.
@@ -33,6 +36,18 @@ def build_semantic_anchors(
     """
     # --- DATA PREPARATION ---
     data = pd.read_csv(str(corpus_path), sep="\t")
+
+    # --- RM FRAMEWORK NUMBER MAPPING ---
+    rm_by_category: dict[str, list[str]] = {}
+    if rm_mapping_path is not None:
+        rm_df = pd.read_csv(str(rm_mapping_path))
+        for category, group in rm_df.groupby("Category"):
+            rm_by_category[category] = (
+                rm_df[rm_df["Category"] == category]["FrameworkNumber"]
+                .dropna()
+                .astype(str)
+                .tolist()
+            )
     data_to_analyse = data[data["Category"].notna()].copy()
 
     data_to_analyse["clean_description"] = data_to_analyse["Description"].apply(
@@ -130,6 +145,20 @@ def build_semantic_anchors(
         ]
         final_cleaned_registry[cat] = [clean_p, clean_s]
 
+    # --- 4. RM FRAMEWORK NUMBER INJECTION ---
+    # Inject RM/framework numbers into each category's primary list after all filters,
+    # so they are never pruned as noise. Missing categories get a new entry.
+    if rm_by_category:
+        for category, rm_numbers in rm_by_category.items():
+            if category in final_cleaned_registry:
+                combined = final_cleaned_registry[category][0] + rm_numbers
+                final_cleaned_registry[category][0] = list(dict.fromkeys(combined))
+            else:
+                final_cleaned_registry[category] = [
+                    list(dict.fromkeys(rm_numbers)),
+                    [],
+                ]
+
     # --- FINAL SAVE ---
     # sort alphabetically for readability
     sorted_registry = {
@@ -170,6 +199,12 @@ def main():
         default=3,
         help="Maximum number of categories a word can appear in before being filtered (default: 3)",
     )
+    parser.add_argument(
+        "--rm-mapping-csv",
+        type=Path,
+        default=None,
+        help="Path to CSV file with FrameworkNumber and Category columns to inject into primary lists",
+    )
 
     args = parser.parse_args()
 
@@ -177,11 +212,15 @@ def main():
     if not args.input_train_tsv.exists():
         raise FileNotFoundError(f"Training file not found: {args.input_train_tsv}")
 
+    if args.rm_mapping_csv is not None and not args.rm_mapping_csv.exists():
+        raise FileNotFoundError(f"RM mapping file not found: {args.rm_mapping_csv}")
+
     # Build semantic anchors
     build_semantic_anchors(
         corpus_path=args.input_train_tsv,
         output_path=args.output_json,
         max_categories=args.max_categories,
+        rm_mapping_path=args.rm_mapping_csv,
     )
 
 
