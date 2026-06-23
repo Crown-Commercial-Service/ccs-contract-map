@@ -3,8 +3,9 @@ import { classificationCases } from './fixtures/testData';
 import { postDescription } from './apiHelper';
 
 // Functional tests
-test("checking if model produces expected output @accuracy", async ({ request }) => {
-    for (const { description, expected } of classificationCases) {
+// using forEach so that a failure of one test doesn't block the others
+classificationCases.forEach(({ description, expected }, index) => {
+    test(`checking if model produces expected output for case ${index + 1}: ${expected} @accuracy`, async ({ request }) => {
         const response = await postDescription(request, description);
         expect(response.ok()).toBeTruthy();
         expect(response.status()).toBe(200);
@@ -12,6 +13,6 @@ test("checking if model produces expected output @accuracy", async ({ request })
         const body = await response.json();
         const actual = body.AI_label;
         console.log(`Description: ${description} => AI Label: ${actual}`, 'Status code: ', response.status());
-        expect(body.AI_label, "The AI labels should match the expected categories in order and be correct").toBe(expected);
-    }
+        expect(body.AI_label, "The AI labels should match the expected categories and be correct").toBe(expected);
+    });
 });
