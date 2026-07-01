@@ -143,7 +143,7 @@ MLFLOW_EXPERIMENT_NAME=ContractMap-Evaluation
 az login
 ```
 
-### Step 1: Process the Truthset
+### Process the Truthset
 
 Before running evaluation, prepare your ground truth data using the `process_truthset.py` script. This script:
 - Cleans and normalizes category names (e.g., converts '&' to 'and', standardizes plural forms)
@@ -177,7 +177,7 @@ This will:
    - `your_truthset_train.tsv` (80% of data)
    - `your_truthset_test.tsv` (20% of data)
 
-### Step 2: Run Evaluation with One Configuration
+### Run Evaluation with One Configuration
 
 Use the `run_eval.py` script to evaluate the model on your test set. This script:
 - Runs the hybrid keyword + LLM classifier on each contract description
@@ -246,7 +246,7 @@ The evaluation script logs the following to MLflow:
 
 View results in Azure ML Studio or query programmatically.
 
-### Step 3: Run Evaluation across Multiple Configurations
+### Run Evaluation across Multiple Configurations
 
 To find the optimal configuration, use the `eval/optimise_parameters.sh` file, which runs a grid search across multiple combinations of the threshold and margin parameters. You can run the file directly through the terminal:
 
@@ -254,7 +254,7 @@ To find the optimal configuration, use the `eval/optimise_parameters.sh` file, w
 bash eval/optimise_parameters.sh
 ```
 
-### Step 4: Visualize Results
+### Visualize Results
 
 After running multiple evaluations, use the `visualise_experiments.py` script to visualize the optimization results. This script fetches all runs from an MLflow experiment and generates plots showing how accuracy varies with threshold and margin parameters.
 
