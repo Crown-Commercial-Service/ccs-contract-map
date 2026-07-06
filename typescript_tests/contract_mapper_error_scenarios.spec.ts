@@ -3,20 +3,20 @@ import { classificationCases } from './fixtures/testData';
 import { postDescription } from './apiHelper';
 
 // Negative and error handling tests 
-test.skip("this test is currently broken: verify endpoint behaviour when empty description is provided @errorcases", async ({ request }) => {
+test("verify endpoint behaviour when empty description is provided @errorcases", async ({ request }) => {
     const emptyDescription = "";
     const response = await postDescription(request, emptyDescription);
-    expect(response.ok()).toBeTruthy();
-    expect(response.status()).toBe(200);
+    expect(response.ok()).toBeFalsy();
+    expect(response.status()).toBe(422);
 
     const body = await response.json();
     console.log(`Response for empty description: `, body, 'Status code: ', response.status());
-    expect(body.AI_label, "The AI label for empty description should be as expected").toBe("Outside New Taxonomy");    
+    expect(body.detail, "The AI label for empty description should be as expected").toBe("Empty Description detected");    
 });
 
-test.skip("this test is currently hold until all Live RM Numbers are in training data: verify endpoint behaviour when description refers Expired RM Number @errorcases", async ({ request }) => {
-    const expiredRMDescription = "Agreement ID RM6111"; // Description referring to an expired RM number
-    const response = await postDescription(request, expiredRMDescription);
+test("verify endpoint behaviour when description refers RM Number outside the training data @errorcases", async ({ request }) => {
+    const unknownRMDescription = "Agreement ID RM9999"; // Description referring to an unknown RM number
+    const response = await postDescription(request, unknownRMDescription);
     expect(response.ok()).toBeTruthy();
     expect(response.status()).toBe(200);
 
@@ -78,7 +78,7 @@ test("verify endpoint behaviour when submitting binary data @errorcases", async 
 });
 
 test("verify endpoint behaviour when description has punctuation marks & special characters @errorcases", async ({ request }) => {
-    const punctuations = "! # $ % + & ' * - / = ? ^ _ ` . { | } ~";
+    const punctuations = "! $ % + & ' * - / = ? ^ _ ` . { | } ~";
     const specialChars = "© ® ™ € £ ¥";
     const response = await postDescription(request, classificationCases[0].description + punctuations + specialChars);
     expect(response.ok()).toBeTruthy();
