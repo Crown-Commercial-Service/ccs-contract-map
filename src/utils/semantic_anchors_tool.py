@@ -145,6 +145,15 @@ def build_semantic_anchors(
         ]
         final_cleaned_registry[cat] = [clean_p, clean_s]
 
+    # --- 5. PRIMARY/SECONDARY DEDUPLICATION ---
+    # Remove any secondary entries that already exist as primary keywords (case-insensitive)
+    for cat, (primary, secondary) in final_cleaned_registry.items():
+        primary_lower = {w.lower().strip() for w in primary}
+        deduped_secondary = [
+            w for w in secondary if w.lower().strip() not in primary_lower
+        ]
+        final_cleaned_registry[cat] = [primary, deduped_secondary]
+
     # --- 4. RM FRAMEWORK NUMBER INJECTION ---
     # Inject RM/framework numbers into each category's primary list after all filters,
     # so they are never pruned as noise. Missing categories get a new entry.

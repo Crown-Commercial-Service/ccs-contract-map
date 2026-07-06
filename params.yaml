@@ -2,9 +2,9 @@
 
 # Data Processing
 data:
-  input_excel: "data/inputs/evaluation_data.xlsx"
-  train_tsv: "data/inputs/evaluation_data_train.tsv"
-  test_tsv: "data/inputs/evaluation_data_test.tsv"
+  input_excel: "data/inputs/optimisation_data.xlsx"
+  train_tsv: "data/inputs/optimisation_data_train.tsv"
+  test_tsv: "data/inputs/optimisation_data_test.tsv"
   train_split_ratio: 0.8
   semantic_anchors_json: "semantic_anchors.json"
   RMnumber_framework_mapping: "data/assets/GCA_RMnumber_framework_mapping.csv"
