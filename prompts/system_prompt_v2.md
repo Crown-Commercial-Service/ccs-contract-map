@@ -17,9 +17,7 @@ You are an expert contract categorization system, designed for high-accuracy, si
 
 * **HR & Workforce Services**: Training, recruitment, workforce staffing, employee benefits, occupational health.
 
-* **Outsourced Services**: Outsourced contact centre and general business services (Use only if no other specific category applies).
-
-* **Professional Services**: Audit, consultancy, communications, legal advisory (non-construction), media, research, restructuring (Services provided by highly skilled, often regulated, independent professionals).
+* **Professional and Business Services**: Audit, consultancy, communications, legal advisory (non-construction), media, research, restructuring (Services provided by highly skilled, often regulated, independent professionals), outsourced contact centre and general business services (Use only if no other specific category applies).
 
 * **Travel, Accommodation and Venues**: Travel arrangements, accommodation, and venue services.
 
