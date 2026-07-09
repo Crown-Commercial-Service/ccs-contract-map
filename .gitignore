@@ -16,3 +16,4 @@ venv/*
 /test-results
 /playwright-report
 /node_modules
+/semantic_anchors.json
