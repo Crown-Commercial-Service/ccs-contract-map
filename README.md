@@ -129,7 +129,7 @@ Use the `run_eval.py` script to evaluate the model on your truthset. This script
 
 ```bash
 python eval/run_eval.py \
-  --truthset data/input/your_test_set.tsv \
+  --truthset data/inputs/your_test_set.tsv \
   --threshold 10 \
   --margin 0 \
   --prompt system_prompt_v2.md \
