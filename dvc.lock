@@ -2,54 +2,64 @@ schema: '2.0'
 stages:
   process_data:
     cmd: python src/utils/process_truthset.py --input 
-      new_AI_results_for_Jasmine.xlsx --train-ratio 0.8
+      data/inputs/optimisation_data.xlsx --train-ratio 0.8
     deps:
-    - path: new_AI_results_for_Jasmine.xlsx
+    - path: data/inputs/optimisation_data.xlsx
       hash: md5
-      md5: e4470135812be67fcd2a85c2f320a8b7
-      size: 123055
+      md5: 2022b636003430a6fbab28125bc9ee6e
+      size: 106515
     - path: src/utils/process_truthset.py
       hash: md5
       md5: e83832d861ab598e4a22a1deb9e31f05
       size: 7120
     params:
       params.yaml:
-        data.input_excel: new_AI_results_for_Jasmine.xlsx
+        data.input_excel: data/inputs/optimisation_data.xlsx
         data.train_split_ratio: 0.8
     outs:
-    - path: new_AI_results_for_Jasmine_test.tsv
+    - path: data/inputs/optimisation_data_test.tsv
       hash: md5
-      md5: f7359d7aa59db31e33c94408a5f55da7
-      size: 71068
-    - path: new_AI_results_for_Jasmine_train.tsv
+      md5: c8a1553de67b8b658911fcb5aaa51bc4
+      size: 58337
+    - path: data/inputs/optimisation_data_train.tsv
       hash: md5
-      md5: c5174ac3be2cf59fc71455a26630b335
-      size: 237574
+      md5: 34b9162d6e9bf58a456d8f9e21048224
+      size: 201711
   extract_keywords:
     cmd: python src/utils/semantic_anchors_tool.py --input-train-tsv 
-      new_AI_results_for_Jasmine_train.tsv --output-json semantic_anchors2.json
+      data/inputs/optimisation_data_train.tsv --output-json 
+      semantic_anchors.json --rm-mapping-csv 
+      data/assets/GCA_RMnumber_framework_mapping.csv
     deps:
-    - path: new_AI_results_for_Jasmine_train.tsv
+    - path: data/assets/GCA_RMnumber_framework_mapping.csv
       hash: md5
-      md5: c5174ac3be2cf59fc71455a26630b335
-      size: 237574
+      md5: 03c2cb472e36205fba4e08a048277b54
+      size: 23769
+    - path: data/inputs/optimisation_data_train.tsv
+      hash: md5
+      md5: 34b9162d6e9bf58a456d8f9e21048224
+      size: 201711
     - path: src/utils/semantic_anchors_tool.py
       hash: md5
-      md5: 0a382ce40b3bf93caae5573baf47a640
-      size: 6269
+      md5: c877ffa39ece4b635808550973da24a9
+      size: 8299
     params:
       params.yaml:
-        data.semantic_anchors_json: semantic_anchors2.json
-        data.train_tsv: new_AI_results_for_Jasmine_train.tsv
+        data.semantic_anchors_json: semantic_anchors.json
+        data.train_tsv: data/inputs/optimisation_data_train.tsv
     outs:
-    - path: semantic_anchors2.json
+    - path: semantic_anchors.json
       hash: md5
-      md5: 47670d1f2b3fe015f3a0d65d3e951e0c
-      size: 137271
+      md5: 45b6e84bbd459f036b2a49a6cbfa24b2
+      size: 86965
   optimize_params:
     cmd: python eval/run_gridsearch.py --params-file params.yaml --truthset 
-      new_AI_results_for_Jasmine.xlsx
+      data/inputs/optimisation_data.xlsx
     deps:
+    - path: data/inputs/optimisation_data_train.tsv
+      hash: md5
+      md5: 34b9162d6e9bf58a456d8f9e21048224
+      size: 201711
     - path: eval/run_eval.py
       hash: md5
       md5: 960621a43d660fcc4cfe63bb3d6d0e95
@@ -58,14 +68,10 @@ stages:
       hash: md5
       md5: b762c2240cc5f195fb36718feef01328
       size: 5812
-    - path: new_AI_results_for_Jasmine_train.tsv
+    - path: semantic_anchors.json
       hash: md5
-      md5: c5174ac3be2cf59fc71455a26630b335
-      size: 237574
-    - path: semantic_anchors2.json
-      hash: md5
-      md5: 47670d1f2b3fe015f3a0d65d3e951e0c
-      size: 137271
+      md5: 45b6e84bbd459f036b2a49a6cbfa24b2
+      size: 86965
     params:
       params.yaml:
         evaluation.prompt_name: system_prompt_v2.md
@@ -98,8 +104,8 @@ stages:
       size: 86
     - path: eval/visualise_experiments.py
       hash: md5
-      md5: cad6809a89e3bb5f8f550928ff929e4f
-      size: 10982
+      md5: ee191bc95427fa73392fabd706a85288
+      size: 11815
     params:
       params.yaml:
         mlflow.experiment_name: ContractMap-Evaluation
@@ -107,5 +113,5 @@ stages:
     outs:
     - path: data/results/optimization_surface.png
       hash: md5
-      md5: 8b02dae90c6ac8518ae6dcee55b693a4
-      size: 672224
+      md5: 3cf57cd870e1a83686041b365923903c
+      size: 653469

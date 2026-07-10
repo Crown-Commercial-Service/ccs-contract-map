@@ -7,11 +7,9 @@ venv/*
 *.vscode
 .github/instructions/
 .idea/
-Davis_atamis_test.xlsx
-nhs_data_evaluation.py
-tenders_experiment.ipynb
 
 # DVC
+/data/inputs/*
 /data/results/*
 
 # Playwright test artifacts
