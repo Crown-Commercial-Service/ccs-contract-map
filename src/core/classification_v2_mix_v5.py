@@ -1,6 +1,6 @@
 from src.core.classification_v2 import contract_mapper_v2
 from src.core.classification_v5 import HeuristicClassifier
-from fastapi.concurrency import run_in_threadpool
+from starlette.concurrency import run_in_threadpool
 
 GLOBAL_CLASSIFIER = HeuristicClassifier()
 
