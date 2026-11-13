@@ -143,6 +143,12 @@ MLFLOW_EXPERIMENT_NAME=ContractMap-Evaluation
 az login
 ```
 
+3. Run the script:
+```
+uvicorn src.api.v3_endpoint:app --reload --host 127.0.0.1 --port 5000
+```
+
+
 ### Step 1: Process the Truthset
 
 Before running evaluation, prepare your ground truth data using the `process_truthset.py` script. This script:
