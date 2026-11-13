@@ -1,9 +1,11 @@
 .env
 venv/*
+.venv/*
 **/__pycache__
 **egg-info
 *.DS_Store
 *ipynb_checkpoints
+task.txt
 *.vscode
 .github/instructions/
 .idea/
