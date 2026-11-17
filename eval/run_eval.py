@@ -133,8 +133,8 @@ async def evaluate_truthset(
     # Resolve prompt file
     prompt_file = _resolve_prompt_file(prompt_name)
 
-    # Import classification function
-    from src.core.classification_v2_mix_v5 import keywords_and_llm
+    # Import classification function (using new unified classifier with compat layer)
+    from contractmap import keywords_and_llm
 
     # Load and normalize data
     df = _load_truthset(truthset_path=truthset_path)
@@ -167,7 +167,7 @@ async def evaluate_truthset(
         mlflow_module.log_param("threshold", threshold)
         mlflow_module.log_param("margin", margin)
         mlflow_module.log_param(
-            "classifier", "classification_v2_mix_v5.keywords_and_llm"
+            "classifier", "contractmap.keywords_and_llm (unified)"
         )
         mlflow_module.log_param("prompt_name", prompt_name)
         mlflow_module.log_param("prompt_path", str(prompt_file.resolve()))
