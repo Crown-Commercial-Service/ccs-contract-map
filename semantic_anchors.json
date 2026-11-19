@@ -2045,13 +2045,7 @@
             "weather conditions"
         ]
     ],
-    "Financial Planning and Estates": [
-        [
-            "WHDS",
-            "WSDS"
-        ],
-        []
-    ],
+
     "Financial Services": [
         [
             "A337571",
@@ -3475,31 +3469,7 @@
             "workplace"
         ]
     ],
-    "Low Value": [
-        [
-            "RM6202",
-            "RM6237",
-            "RM6254",
-            "RM6256",
-            "RM6369",
-            "RM6419"
-        ],
-        []
-    ],
-    "Managed Service": [
-        [
-            "2013/S 235-408288",
-            "2014/S 020-031462",
-            "CO",
-            "CR150025BIS",
-            "HOCS-CM8_00014",
-            "PCoE",
-            "RCUK",
-            "RM6327",
-            "SPS"
-        ],
-        []
-    ],
+
     "Network Services": [
         [
             "2G",
@@ -3897,43 +3867,7 @@
             "wiring"
         ]
     ],
-    "Non CCS Managed": [
-        [
-            "343",
-            "664 Consultancy Services",
-            "664-17",
-            "CSR-ESSEADPS",
-            "CSR-RSF",
-            "DUMMY",
-            "HMRC 15-SCR-1118",
-            "HO/CPPP/08",
-            "PS2016",
-            "RM4167",
-            "RM6005",
-            "RM6010",
-            "RM6015",
-            "RM6019",
-            "RM6030",
-            "RM6106",
-            "RM6109",
-            "RM6117",
-            "RM6122",
-            "RM6129",
-            "RM6136",
-            "RM6139",
-            "RM6156",
-            "RM6214",
-            "RM6324",
-            "RM6326",
-            "UI_DWP_00658",
-            "UI_DWP_100217",
-            "UI_DWP_100348)",
-            "YPO 295",
-            "YPO295",
-            "YPO569"
-        ],
-        []
-    ],
+
     "Outside New Taxonomy": [
         [
             "1-4 seats",
