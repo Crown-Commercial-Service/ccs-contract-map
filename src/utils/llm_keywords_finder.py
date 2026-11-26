@@ -1,12 +1,12 @@
-from pydantic_ai.models.openai import OpenAIChatModel
-from pydantic_ai.providers.openai import OpenAIProvider
+import os
+from pathlib import Path
+
+from dotenv import load_dotenv
 from openai import AsyncAzureOpenAI
 from pydantic import BaseModel, Field
 from pydantic_ai import Agent, ModelSettings
-from dotenv import load_dotenv
-from pathlib import Path
-from typing import List
-import os
+from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai.providers.openai import OpenAIProvider
 
 load_dotenv()
 
@@ -16,11 +16,11 @@ DEFAULT_SYSTEM_PROMPT_FILE = (
 
 
 class KeywordsFinder(BaseModel):
-    primary: List[str] = Field(
+    primary: list[str] = Field(
         description="High-precision nouns exclusive to this category (e.g., 'kerosene'). Max 15 words.",
         min_length=1,
     )
-    secondary: List[str] = Field(
+    secondary: list[str] = Field(
         description="Supporting context words often found in this category (e.g., 'supply'). Max 20 words.",
         min_length=1,
     )
@@ -51,7 +51,7 @@ def keywords_finder_llm(description):
         ),
     )
 
-    with open(DEFAULT_SYSTEM_PROMPT_FILE, "r", encoding="utf-8") as f:
+    with open(DEFAULT_SYSTEM_PROMPT_FILE, encoding="utf-8") as f:
         raw_prompt_template = f.read()
 
     prompt = raw_prompt_template.replace("{{combined_text}}", description)

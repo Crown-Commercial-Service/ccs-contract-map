@@ -1,24 +1,24 @@
 """CCS Contract Map - Hybrid Keyword + LLM Classifier for CCS Categories."""
 
 from .classifier import (
-    ContractClassifier,
+    AsyncHeuristicClassifier,
+    BaseLLMCache,
     ClassificationResult,
     ClassifierSettings,
+    ContractClassifier,
+    LLMCache,
+    OptimizedLLMClassifier,
+    RedisLLMCache,
+    ScoringConfig,
     get_classifier,
     init_classifier,
     reset_classifier,
-    AsyncHeuristicClassifier,
-    BaseLLMCache,
-    LLMCache,
-    RedisLLMCache,
-    OptimizedLLMClassifier,
-    ScoringConfig,
 )
 
 # Backward compatibility
 from .compat import (
-    keywords_and_llm,
     HeuristicClassifier,
+    keywords_and_llm,
 )
 
 __version__ = "0.2.1"

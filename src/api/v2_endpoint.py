@@ -1,22 +1,24 @@
-from src.core.classification_v2 import contract_mapper_v2
-from fastapi import FastAPI, HTTPException, status
 import os
 from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, HTTPException, status
+
+# Cache Imports
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend  # Added for fallback
+from fastapi_cache.backends.redis import RedisBackend
+from fastapi_cache.decorator import cache
 from pydantic import BaseModel
 
 # Redis & Identity Imports
 from redis.asyncio import Redis
 from redis_entraid.cred_provider import create_from_default_azure_credential
 
-# Cache Imports
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.redis import RedisBackend
-from fastapi_cache.backends.inmemory import InMemoryBackend  # Added for fallback
-from fastapi_cache.decorator import cache
+from src.core.classification_v2 import contract_mapper_v2
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):
     # --- Startup ---
     REDIS_SCOPE = ("https://redis.azure.com/.default",)
     redis_host = os.getenv("REDIS_HOST")
@@ -74,4 +76,4 @@ async def run_contract_mapper(body: ContractDescription):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An internal error occurred while processing the contract mapping.",
-        )
+        ) from e

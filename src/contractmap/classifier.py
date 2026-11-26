@@ -5,30 +5,28 @@ This module replaces classification_v1.py, v2.py, v5.py, v2_mix_v5.py
 with a single, configurable, production-ready classifier.
 """
 
+import hashlib
 import json
+import logging
 import os
 import re
-import logging
-import hashlib
+
+# from .semantic_cache import SemanticCache, HybridCache
+# Configure structured logging with file output
+import sys
 import time
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional, Dict, List, Tuple, Any, Protocol
-from functools import lru_cache
+from typing import Any
 
 import structlog
-from pydantic import BaseModel, Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
-
+from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import AzureChatOpenAI
-from langchain_core.messages import SystemMessage, HumanMessage
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Local imports
 from .calibration import HeuristicScoreCalibrator
-# from .semantic_cache import SemanticCache, HybridCache
-
-# Configure structured logging with file output
-import sys
 
 _LOGS_DIR = Path(__file__).resolve().parent.parent.parent / "logs"
 _LOGS_DIR.mkdir(parents=True, exist_ok=True)
@@ -107,7 +105,7 @@ class ClassifierSettings(BaseSettings):
     rm_keyword_points: int = Field(50, alias="RM_KEYWORD_POINTS")
     primary_keyword_points: int = Field(5, alias="PRIMARY_KEYWORD_POINTS")
     secondary_keyword_points: int = Field(1, alias="SECONDARY_KEYWORD_POINTS")
-    
+
 
 @dataclass(frozen=True)
 class ScoringConfig:
@@ -127,7 +125,7 @@ class ScoringConfig:
     umbrella_multiplier: float = 0.75
 
     # Deterministic tie-breaker: higher number = more specific = wins ties
-    category_priority: Dict[str, int] = field(default_factory=lambda: {
+    category_priority: dict[str, int] = field(default_factory=lambda: {
         "Outside New Taxonomy": 15,
         "Network Services": 10,
         "Cloud and Hosting": 10,
@@ -154,10 +152,10 @@ class ClassificationResult:
     latency_ms: float
     tokens_used: int = 0
     cache_hit: bool = False
-    runner_up: Optional[str] = None
+    runner_up: str | None = None
     runner_up_score: int = 0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "category": self.category,
             "method": self.method,
@@ -171,7 +169,7 @@ class ClassificationResult:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ClassificationResult":
+    def from_dict(cls, data: dict[str, Any]) -> "ClassificationResult":
         return cls(
             category=data["category"],
             method=data.get("method", "cache"),
@@ -191,7 +189,7 @@ class ClassificationResult:
 
 class BaseLLMCache:
     """Abstract base/protocol for async LLM cache operations."""
-    async def get(self, description: str, prompt_hash: str) -> Optional[ClassificationResult]:
+    async def get(self, description: str, prompt_hash: str) -> ClassificationResult | None:
         raise NotImplementedError
 
     async def set(self, description: str, prompt_hash: str, result: ClassificationResult) -> None:
@@ -205,14 +203,14 @@ class LLMCache(BaseLLMCache):
     """Fallback in-memory cache for LLM responses with TTL."""
 
     def __init__(self, ttl_seconds: int = 3600):
-        self._cache: Dict[str, Tuple[ClassificationResult, float]] = {}
+        self._cache: dict[str, tuple[ClassificationResult, float]] = {}
         self._ttl = ttl_seconds
 
     def _make_key(self, description: str, prompt_hash: str) -> str:
         desc_hash = hashlib.sha256(description.encode()).hexdigest()[:16]
         return f"{prompt_hash}:{desc_hash}"
 
-    async def get(self, description: str, prompt_hash: str) -> Optional[ClassificationResult]:
+    async def get(self, description: str, prompt_hash: str) -> ClassificationResult | None:
         key = self._make_key(description, prompt_hash)
         if key in self._cache:
             result, timestamp = self._cache[key]
@@ -247,7 +245,7 @@ class RedisLLMCache(BaseLLMCache):
         desc_hash = hashlib.sha256(description.encode()).hexdigest()[:16]
         return f"{self.prefix}{prompt_hash}:{desc_hash}"
 
-    async def get(self, description: str, prompt_hash: str) -> Optional[ClassificationResult]:
+    async def get(self, description: str, prompt_hash: str) -> ClassificationResult | None:
         key = self._make_key(description, prompt_hash)
         try:
             raw_val = await self.redis.get(key)
@@ -301,13 +299,13 @@ class AsyncHeuristicClassifier:
     def __init__(self, registry_path: Path, scoring: ScoringConfig):
         self.registry_path = registry_path
         self.scoring = scoring
-        self._registry: Dict = {}
-        self._compiled: Dict[str, Tuple[List[Tuple[re.Pattern, int]], List[re.Pattern]]] = {}
-        self._categories: List[str] = []
+        self._registry: dict = {}
+        self._compiled: dict[str, tuple[list[tuple[re.Pattern, int]], list[re.Pattern]]] = {}
+        self._categories: list[str] = []
         self._load_and_compile()
 
     def _load_and_compile(self) -> None:
-        with open(self.registry_path, "r", encoding="utf-8") as f:
+        with open(self.registry_path, encoding="utf-8") as f:
             self._registry = json.load(f)
 
         self._categories = sorted(self._registry.keys())
@@ -327,13 +325,13 @@ class AsyncHeuristicClassifier:
 
         logger.info("heuristic_classifier_loaded", categories=len(self._categories))
 
-    async def classify(self, description: str) -> Tuple[Optional[str], float, Optional[str], float]:
+    async def classify(self, description: str) -> tuple[str | None, float, str | None, float]:
         if not description:
             return None, 0, None, 0
 
         start = time.perf_counter()
         desc_lower = description.lower()
-        category_scores: Dict[str, float] = {}
+        category_scores: dict[str, float] = {}
 
         for category, (primary_patterns, secondary_patterns) in self._compiled.items():
             score = 0.0
@@ -375,7 +373,7 @@ class AsyncHeuristicClassifier:
         )
 
         return best_cat, best_score, runner_up_cat, runner_up_score
-    
+
     def should_use_llm(self, best_score: int, runner_up_score: int) -> bool:
         if best_score < self.scoring.threshold:
             return True
@@ -410,12 +408,12 @@ class OptimizedLLMClassifier:
         self,
         settings: ClassifierSettings,
         system_prompt: str,
-        cache: Optional[BaseLLMCache] = None
+        cache: BaseLLMCache | None = None
     ):
         self.settings = settings
         self.system_prompt = system_prompt
         self._prompt_hash = hashlib.sha256(system_prompt.encode()).hexdigest()[:16]
-        self.cache: Optional[BaseLLMCache] = cache
+        self.cache: BaseLLMCache | None = cache
 
         # Build LLM with optimized settings
         self.llm = AzureChatOpenAI(
@@ -460,8 +458,8 @@ class OptimizedLLMClassifier:
         self,
         description: str,
         heuristic_score: float,
-        heuristic_cat: Optional[str] = None,
-        runner_up: Optional[str] = None,
+        heuristic_cat: str | None = None,
+        runner_up: str | None = None,
         runner_up_score: float = 0,
     ) -> ClassificationResult:
         """Classify with async cache checks and validation."""
@@ -538,9 +536,9 @@ class ContractClassifier:
 
     def __init__(
         self,
-        settings: Optional[ClassifierSettings] = None,
-        redis_client: Optional[Any] = None,
-        cache: Optional[BaseLLMCache] = None,
+        settings: ClassifierSettings | None = None,
+        redis_client: Any | None = None,
+        cache: BaseLLMCache | None = None,
     ):
         self.settings = settings or ClassifierSettings()
         self.scoring = ScoringConfig(
@@ -551,7 +549,7 @@ class ContractClassifier:
             margin=self.settings.keyword_margin,
         )
 
-        with open(self.settings.system_prompt_path, "r", encoding="utf-8") as f:
+        with open(self.settings.system_prompt_path, encoding="utf-8") as f:
             self.system_prompt = f.read()
 
         self.calibrator = self._load_calibrator()
@@ -637,12 +635,12 @@ class ContractClassifier:
 
         return llm_result
 
-    async def classify_batch(self, descriptions: List[str]) -> List[ClassificationResult]:
+    async def classify_batch(self, descriptions: list[str]) -> list[ClassificationResult]:
         import asyncio
         tasks = [self.classify(desc) for desc in descriptions]
         return await asyncio.gather(*tasks)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         stats = {
             "categories_loaded": len(self.heuristic._categories),
             "scoring_config": {
@@ -672,10 +670,10 @@ class ContractClassifier:
 # Factory / Dependency Injection Functions
 # =============================================================================
 
-_classifier_instance: Optional[ContractClassifier] = None
+_classifier_instance: ContractClassifier | None = None
 
 
-def init_classifier(redis_client: Optional[Any] = None, settings: Optional[ClassifierSettings] = None) -> ContractClassifier:
+def init_classifier(redis_client: Any | None = None, settings: ClassifierSettings | None = None) -> ContractClassifier:
     """
     Initialize the singleton classifier instance (typically called inside lifespan).
     """
@@ -684,7 +682,7 @@ def init_classifier(redis_client: Optional[Any] = None, settings: Optional[Class
     return _classifier_instance
 
 
-def get_classifier(redis_client: Optional[Any] = None) -> ContractClassifier:
+def get_classifier(redis_client: Any | None = None) -> ContractClassifier:
     """
     Get or create singleton classifier instance.
     If already initialized during lifespan, returns existing instance.

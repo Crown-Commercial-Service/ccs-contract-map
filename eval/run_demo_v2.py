@@ -6,10 +6,11 @@ SRC_DIR = REPO_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-from contractmap import get_classifier
+import asyncio
 
 import pandas as pd
-import asyncio
+
+from contractmap import get_classifier
 
 """
 this script demos LLMs shows ability to classify CCS category
@@ -32,7 +33,7 @@ async def main():
     count_correct = 0
     list_results = []
 
-    for description, category in zip(list_descriptions, list_category):
+    for description, category in zip(list_descriptions, list_category, strict=True):
         result = await classifier.classify(description)
         list_results.append(result.category)
         print(f" actual:{category}  AI:{result.category}, {category in result.category}")

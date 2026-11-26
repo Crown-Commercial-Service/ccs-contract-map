@@ -2,13 +2,12 @@
 FastAPI v3 Endpoint - Production-ready contract classification API.
 """
 
+import logging
 import os
 import sys
 import time
-import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Optional
 
 # Ensure src/contractmap is importable when running from project root
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -16,22 +15,24 @@ SRC_DIR = REPO_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-from fastapi import FastAPI, HTTPException, status, Request, Depends
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field, field_validator
+from dotenv import load_dotenv
+
+load_dotenv(REPO_ROOT / ".env")
+
 import structlog
+from fastapi import FastAPI, HTTPException, Request, status
+from fastapi.responses import JSONResponse
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
+from fastapi_cache.backends.redis import RedisBackend
+from pydantic import BaseModel, Field, field_validator
 
 # Redis & Cache Imports
 from redis.asyncio import Redis
 from redis_entraid.cred_provider import create_from_default_azure_credential
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.redis import RedisBackend
-from fastapi_cache.backends.inmemory import InMemoryBackend
 
 # ContractMap imports
-from contractmap import get_classifier, ClassificationResult
-from contractmap.classifier import ClassifierSettings
+from contractmap import ClassificationResult, get_classifier, init_classifier
 
 # =============================================================================
 # Logging Configuration - File + Console
@@ -103,7 +104,7 @@ class ClassificationResponse(BaseModel):
     latency_ms: float
     tokens_used: int = 0
     cache_hit: bool = False
-    runner_up: Optional[str] = None
+    runner_up: str | None = None
     runner_up_score: int = 0
 
 
@@ -111,7 +112,7 @@ class StatsResponse(BaseModel):
     categories_loaded: int
     scoring_config: dict
     llm_config: dict
-    cache_size: Optional[int] = None
+    cache_size: int | None = None
 
 
 class SimpleRateLimiter:
@@ -147,7 +148,7 @@ async def lifespan(app: FastAPI):
     """Application lifespan - startup and shutdown."""
     logger.info("api_starting", version="0.2.1")
 
-    redis_client: Optional[Redis] = None
+    redis_client: Redis | None = None
     REDIS_SCOPE = ("https://redis.azure.com/.default",)
     redis_host = os.getenv("REDIS_HOST")
 
@@ -184,7 +185,7 @@ async def lifespan(app: FastAPI):
         FastAPICache.init(InMemoryBackend(), prefix="ccs-mapper-cache")
 
     try:
-        classifier = get_classifier()
+        classifier = init_classifier(redis_client=redis_client)
         app.state.classifier = classifier
 
         stats = classifier.get_stats()
@@ -287,7 +288,7 @@ async def classify_contract(body: ContractDescription, request: Request):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Classification failed. Please try again."
-        )
+        ) from e
 
 
 # Backward Compatibility Endpoint

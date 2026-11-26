@@ -44,6 +44,7 @@ asyncssh==2.23.0
 atpublic==7.0.0
     # via flufl-lock
 attrs==26.1.0
+structlog
     # via
     #   aiohttp
     #   dvc

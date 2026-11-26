@@ -1,9 +1,9 @@
 import argparse
+import ast
 import json
 from pathlib import Path
 
 import pandas as pd
-import ast
 
 from src.utils.llm_keywords_finder import keywords_finder_llm
 
@@ -41,7 +41,7 @@ def build_semantic_anchors(
     rm_by_category: dict[str, list[str]] = {}
     if rm_mapping_path is not None:
         rm_df = pd.read_csv(str(rm_mapping_path))
-        for category, group in rm_df.groupby("Category"):
+        for category, _group in rm_df.groupby("Category"):
             rm_by_category[category] = (
                 rm_df[rm_df["Category"] == category]["FrameworkNumber"]
                 .dropna()
@@ -124,7 +124,7 @@ def build_semantic_anchors(
     # --- 3. GLOBAL FREQUENCY FILTER (NOISE CANCELLATION) ---
     # If a word appears in more than max_categories, it's generic noise and should be deleted
     global_word_frequency = {}
-    for cat, content in registry.items():
+    for _cat, content in registry.items():
         all_words = set(content[0] + content[1])
         for word in all_words:
             w_clean = word.lower().strip()

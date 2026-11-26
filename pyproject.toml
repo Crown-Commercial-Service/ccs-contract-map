@@ -61,7 +61,7 @@ include = ["contractmap*"]
 "" = "src"
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["training"]
 pythonpath = ["src"]
 asyncio_mode = "auto"
 addopts = "-v --tb=short"
@@ -71,6 +71,12 @@ line-length = 100
 target-version = "py311"
 select = ["E", "W", "F", "I", "B", "C4", "UP", "PT", "ARG"]
 ignore = ["E501", "B008"]
+
+[tool.ruff.lint.per-file-ignores]
+# Deliberate sys.path setup before importing the package.
+"src/api/v3_endpoint.py" = ["E402"]
+"eval/run_demo_v2.py" = ["E402"]
+"src/contractmap/compat.py" = ["E402"]
 
 [tool.ruff.format]
 quote-style = "double"

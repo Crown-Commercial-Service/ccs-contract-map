@@ -12,6 +12,8 @@ task.txt
 Davis_atamis_test.xlsx
 nhs_data_evaluation.py
 tenders_experiment.ipynb
+/training/*
+/logs/*
 
 # DVC
 /data/results/*
