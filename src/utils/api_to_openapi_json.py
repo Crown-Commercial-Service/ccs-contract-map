@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
+
 import requests
+
 
 def clean_fastapi_openapi_json(raw_json):
     try:

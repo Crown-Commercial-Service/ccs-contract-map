@@ -1,8 +1,9 @@
-from src.core.classification_v1 import contract_mapper
-from fastapi import FastAPI
-from pydantic import BaseModel
 from pathlib import Path
 
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+from src.core.classification_v1 import contract_mapper
 
 app = FastAPI()
 

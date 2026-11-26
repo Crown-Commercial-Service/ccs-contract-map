@@ -24,7 +24,7 @@ def load_params(params_file: Path) -> dict:
     if not params_file.exists():
         raise FileNotFoundError(f"Parameters file not found: {params_file}")
 
-    with open(params_file, "r") as f:
+    with open(params_file) as f:
         params = yaml.safe_load(f)
 
     return params
